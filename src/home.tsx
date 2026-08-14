@@ -7,11 +7,13 @@ import {
 import type { Movie } from "./types/movies";
 import { getMovies } from "./service/movieapi";
 import { MovieCard } from "./components/MovieCard";
-import { SearchBar } from "./components/SearchBar";
 
-function Home() {
+type Props = {
+  searchCallbackRef?: React.MutableRefObject<((query: string) => void) | null>;
+};
+
+function Home({ searchCallbackRef }: Props) {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [movieName, setMovieName] = useState("");
   const [loading, setLoading] = useState(false);
 
   const moviesRef = useRef<HTMLElement>(null);
@@ -40,6 +42,12 @@ function Home() {
   };
 
   useEffect(() => {
+    if (searchCallbackRef) {
+      searchCallbackRef.current = searchMovies;
+    }
+  }, [searchCallbackRef]);
+
+  useEffect(() => {
     const loadPopularMovies = async () => {
       setLoading(true);
 
@@ -58,29 +66,8 @@ function Home() {
     loadPopularMovies();
   }, []);
 
-  useEffect(() => {
-    if (!movieName.trim()) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      searchMovies(movieName);
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [movieName]);
-
   return (
     <div className="home">
-      <SearchBar
-        value={movieName}
-        onChange={setMovieName}
-        onSearch={() => searchMovies(movieName)}
-        loading={loading}
-      />
-
       <main
         ref={moviesRef}
         className="movies-section"

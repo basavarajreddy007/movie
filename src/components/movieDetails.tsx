@@ -1,25 +1,15 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  useParams,
-} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import type { Movie } from "../types/movies";
-
-import {
-  getMovieById,
-} from "../service/movieapi";
+import { getMovieById } from "../service/movieapi";
 
 import "../styles/MovieDetails.css";
 
 function MovieDetails() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
 
-  const [movie, setMovie] =
-    useState<Movie | null>(null);
+  const [movie, setMovie] = useState<Movie | null>(null);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -27,10 +17,9 @@ function MovieDetails() {
 
       try {
         const data = await getMovieById(id);
-
         setMovie(data);
       } catch (error) {
-        console.log(error);
+        console.error("Failed to fetch movie:", error);
       }
     };
 
@@ -45,6 +34,14 @@ function MovieDetails() {
     );
   }
 
+  const posterUrl = movie.poster_path
+    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    : "https://via.placeholder.com/500x750?text=No+Poster";
+
+  const rating = movie.vote_average
+    ? movie.vote_average.toFixed(1)
+    : "N/A";
+
   return (
     <main className="movie-page">
       <div className="movie-details">
@@ -52,8 +49,8 @@ function MovieDetails() {
         <div className="poster-wrapper">
           <img
             className="movie-poster"
-            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-            alt={movie.title}
+            src={posterUrl}
+            alt={movie.title || "Movie poster"}
           />
         </div>
 
@@ -66,19 +63,13 @@ function MovieDetails() {
           <h1>{movie.title}</h1>
 
           <div className="movie-meta">
-
             <span className="rating">
-              {movie.vote_average
-                ? movie.vote_average.toFixed(1)
-                : "N/A"}{" "}
-              / 10
+              {rating} / 10
             </span>
 
             <span className="release-date">
-              {movie.release_date ||
-                "Release date unavailable"}
+              {movie.release_date || "Release date unavailable"}
             </span>
-
           </div>
 
           <div className="divider" />
@@ -86,25 +77,20 @@ function MovieDetails() {
           <h2>Overview</h2>
 
           <p className="overview">
-            {movie.overview ||
-              "No overview available for this movie."}
+            {movie.overview || "No overview available for this movie."}
           </p>
 
           <div className="movie-actions">
-
-            <button className="watch-button">
+            <button className="watch-button" type="button">
               <svg
                 viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                fill="currentColor"
+                aria-hidden="true"
               >
                 <path d="M8 5v14l11-7z" />
               </svg>
 
-              Watch Now
+              <span>Watch Now</span>
             </button>
-
           </div>
 
         </div>
