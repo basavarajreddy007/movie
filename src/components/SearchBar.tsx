@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import "../styles/SearchBar.css";
 
 type Props = {
@@ -13,6 +14,16 @@ export function SearchBar({
   onSearch,
   loading,
 }: Props) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (value.trim()) {
+        onSearch();
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [value]);
+
   return (
     <div className="search-container">
       <div className="search-wrapper">
