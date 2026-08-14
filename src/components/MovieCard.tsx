@@ -7,71 +7,74 @@ type Props = {
 };
 
 export function MovieCard({ movie }: Props) {
-  const rating = movie.vote_average || 0;
-  const releaseYear = movie.release_date 
-    ? new Date(movie.release_date).getFullYear() 
-    : 'N/A';
-  const ratingPercentage = Math.round((rating / 10) * 100);
+  const rating = movie.vote_average
+    ? movie.vote_average.toFixed(1)
+    : "N/A";
+
+  const releaseYear = movie.release_date
+    ? new Date(movie.release_date).getFullYear()
+    : "N/A";
+
+  const posterUrl = movie.poster_path
+    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    : null;
 
   return (
-    <Link
-      to={`/movie/${movie.id}`}
-      className="movie-link"
-      style={{
-        textDecoration: "none",
-        color: "inherit",
-      }}
-    >
-      <div className="movie-card">
+    <Link to={`/movie/${movie.id}`} className="movie-link">
+      <article className="movie-card">
         <div className="movie-image-container">
-          <img
-            src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
-            alt={movie.title}
-            className="movie-image"
-          />
-          
-        
-          <div className="movie-overlay"></div>
+          {posterUrl ? (
+            <img
+              src={posterUrl}
+              alt={movie.title}
+              className="movie-image"
+              loading="lazy"
+            />
+          ) : (
+            <div className="movie-image-placeholder">
+              <span>{movie.title}</span>
+            </div>
+          )}
 
-         
+          <div className="movie-overlay" />
+
           <div className="play-button-container">
-            <button className="play-button" aria-label="Play">
-              <svg 
-                viewBox="0 0 24 24" 
-                width="24" 
-                height="24" 
-                fill="currentColor"
-              >
+            <div className="play-button">
+              <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M8 5v14l11-7z" />
               </svg>
-            </button>
+            </div>
           </div>
 
-         
           <div className="rating-badge">
             <div className="rating-circle">
-              <svg className="rating-svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" className="rating-bg" />
-                <circle cx="50" cy="50" r="45" className="rating-progress" 
-                  style={{
-                    strokeDasharray: `${ratingPercentage * 2.827} 282.7`,
-                  }} 
-                />
+              <svg
+                className="rating-star-icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
               </svg>
-              <span className="rating-text">{ratingPercentage}%</span>
+
+              <span className="rating-text">{rating}</span>
             </div>
           </div>
         </div>
 
-        
-        <div className="movie-details">
+        <div className="movie-card-details">
           <h3 className="movie-title">{movie.title}</h3>
-          <p className="movie-release-year">{releaseYear}</p>
+
+          <span className="movie-release-year">
+            {releaseYear}
+          </span>
+
           {movie.overview && (
-            <p className="movie-overview"></p>
+            <p className="movie-overview">
+              {movie.overview}
+            </p>
           )}
         </div>
-      </div>
+      </article>
     </Link>
   );
 }

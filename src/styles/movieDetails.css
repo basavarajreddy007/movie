@@ -2,251 +2,323 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary-color: #ff6b6b;
+  --primary-light: #ff8787;
+  --accent-color: #4ecdc4;
+  --dark-bg: #0a0e27;
+  --card-bg: rgba(20, 25, 47, 0.8);
+  --card-border: rgba(80, 90, 150, 0.3);
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+}
+
 .movie-page {
   min-height: 100vh;
   padding: 60px 20px;
-
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1628 100%);
 }
 
 .movie-details {
   position: relative;
-
   display: flex;
   align-items: flex-start;
-
-  gap: 45px;
-
+  gap: 60px;
   width: 100%;
-  max-width: 1100px;
-
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 35px;
-
-  border-radius: 8px;
-
-  background: white;
-
-  border: 1px solid #ddd;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
+  padding: 50px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(20, 25, 47, 0.95) 0%, rgba(15, 22, 40, 0.95) 100%);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
   overflow: hidden;
 }
 
-/* Poster */
-
+/* POSTER SECTION */
 .poster-wrapper {
   position: relative;
-
-  width: 280px;
-  height: 420px;
-
+  width: 300px;
+  height: 450px;
   flex-shrink: 0;
-
-  border-radius: 8px;
-
+  border-radius: 16px;
   overflow: hidden;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-  transition: box-shadow 0.3s ease;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 15px 40px rgba(255, 107, 107, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .movie-poster {
   display: block;
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
 .poster-wrapper:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 20px 50px rgba(255, 107, 107, 0.3);
 }
 
-/* Movie information */
-
+/* MOVIE INFORMATION */
 .movie-info {
   position: relative;
-
   z-index: 2;
-
   flex: 1;
-
   min-width: 0;
-
-  padding-top: 5px;
+  padding-top: 0;
 }
-
-/* Small label */
 
 .movie-label {
   display: inline-block;
-
-  margin-bottom: 12px;
-
-  font-size: 11px;
-
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  font-size: 12px;
   font-weight: 600;
-
-  letter-spacing: 1px;
-
-  color: #666;
+  letter-spacing: 1.5px;
+  color: var(--primary-color);
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 6px;
   text-transform: uppercase;
 }
 
-/* Movie title */
-
+/* TITLE */
 .movie-info h1 {
-  margin: 0 0 22px;
-
-  font-size: clamp(32px, 4vw, 48px);
-
-  line-height: 1.1;
-
-  font-weight: 700;
-
-  letter-spacing: -0.5px;
-
-  color: #222;
+  margin: 0 0 28px;
+  font-size: clamp(36px, 5vw, 52px);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffa06b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Movie metadata */
-
+/* METADATA */
 .movie-meta {
   display: flex;
-
   align-items: center;
-
   flex-wrap: wrap;
-
-  gap: 20px;
-
-  font-size: 15px;
-
-  font-weight: 600;
-
-  color: #555;
-  
+  gap: 28px;
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--card-border);
 }
 
 .movie-meta span {
   display: flex;
-
   align-items: center;
-
-  gap: 5px;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .rating {
-  color: #333;
+  color: var(--primary-color);
+  background: rgba(255, 107, 107, 0.1);
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rating::before {
+  content: "★";
+  font-size: 18px;
 }
 
 .release-date {
-  color: #666;
+  color: var(--text-secondary);
 }
 
-/* Divider */
-
+/* DIVIDER */
 .divider {
   width: 100%;
-
   height: 1px;
-
-  margin: 25px 0;
-
-  background: #ddd;
+  margin: 32px 0;
+  background: var(--card-border);
 }
 
-/* Overview heading */
-
+/* OVERVIEW HEADING */
 .movie-info h2 {
-  margin: 0 0 12px;
-
-  font-size: 20px;
-
+  margin: 0 0 16px;
+  font-size: 22px;
   font-weight: 700;
-
-  color: #222;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
 }
 
-/* Overview */
-
+/* OVERVIEW TEXT */
 .overview {
   max-width: 650px;
-
   margin: 0;
-
   font-size: 16px;
-
-  line-height: 1.8;
-
-  color: #666;
+  line-height: 1.9;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
 }
 
-/* Buttons */
-
+/* ACTION BUTTONS */
 .movie-actions {
   display: flex;
-
   align-items: center;
-
-  gap: 14px;
-
-  margin-top: 30px;
+  gap: 16px;
+  margin-top: 36px;
+  flex-wrap: wrap;
 }
 
 .watch-button,
 .watchlist-button {
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   min-height: 48px;
-
-  padding: 0 22px;
-
-  border-radius: 6px;
-
-  font-size: 14px;
-
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 600;
-
+  letter-spacing: 0.5px;
   cursor: pointer;
-
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
 }
 
 .watch-button {
-  gap: 8px;
-
+  gap: 10px;
   border: none;
-
-  color: white;
-
-  background: #333;
+  color: #f5f5f5;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
 }
 
 .watch-button:hover {
-  background: #555;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
 }
 
 .watchlist-button {
-  border: 1px solid #999;
-
-  color: #333;
-
-  background: white;
+  border: 2px solid var(--card-border);
+  color: var(--text-primary);
+  background: transparent;
 }
 
 .watchlist-button:hover {
-  background: #f9f9f9;
+  border-color: var(--primary-color);
+  background: rgba(255, 107, 107, 0.1);
+}
 
-  border-color: #666;
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .movie-details {
+    gap: 40px;
+    padding: 40px;
+  }
+
+  .poster-wrapper {
+    width: 260px;
+    height: 390px;
+  }
+
+  .movie-info h1 {
+    font-size: 38px;
+  }
+}
+
+@media (max-width: 768px) {
+  .movie-page {
+    padding: 40px 16px;
+  }
+
+  .movie-details {
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .poster-wrapper {
+    width: 240px;
+    height: 360px;
+  }
+
+  .movie-info {
+    width: 100%;
+  }
+
+  .movie-info h1 {
+    font-size: 32px;
+    margin-bottom: 24px;
+  }
+
+  .movie-meta {
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .overview {
+    text-align: left;
+    font-size: 15px;
+  }
+
+  .movie-actions {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .watch-button,
+  .watchlist-button {
+    flex: 1;
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-page {
+    padding: 24px 12px;
+  }
+
+  .movie-details {
+    padding: 24px 16px;
+    gap: 28px;
+  }
+
+  .poster-wrapper {
+    width: 180px;
+    height: 270px;
+  }
+
+  .movie-info h1 {
+    font-size: 26px;
+  }
+
+  .movie-label {
+    margin-bottom: 12px;
+    font-size: 11px;
+  }
+
+  .movie-meta {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .overview {
+    font-size: 14px;
+  }
+
+  .movie-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .watch-button,
+  .watchlist-button {
+    width: 100%;
+  }
 }
 
 /* Loading */
