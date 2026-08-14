@@ -20,7 +20,10 @@ export function MovieCard({ movie }: Props) {
     : null;
 
   return (
-    <Link to={`/movie/${movie.id}`} className="movie-link">
+    <Link
+      to={`/movie/${movie.id}`}
+      className="movie-link"
+    >
       <article className="movie-card">
         <div className="movie-image-container">
           {posterUrl ? (
@@ -40,7 +43,10 @@ export function MovieCard({ movie }: Props) {
 
           <div className="play-button-container">
             <div className="play-button">
-              <svg viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
@@ -56,13 +62,17 @@ export function MovieCard({ movie }: Props) {
                 <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
               </svg>
 
-              <span className="rating-text">{rating}</span>
+              <span className="rating-text">
+                {rating}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="movie-card-details">
-          <h3 className="movie-title">{movie.title}</h3>
+          <h3 className="movie-title">
+            {movie.title}
+          </h3>
 
           <span className="movie-release-year">
             {releaseYear}

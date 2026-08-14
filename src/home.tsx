@@ -1,4 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+} from "react";
+
 import type { Movie } from "./types/movies";
 import { getMovies } from "./service/movieapi";
 import { MovieCard } from "./components/MovieCard";
@@ -20,6 +25,7 @@ function Home() {
 
     try {
       const data = await getMovies(query);
+
       setMovies(data.slice(0, 30));
 
       moviesRef.current?.scrollIntoView({
@@ -39,6 +45,7 @@ function Home() {
 
       try {
         const data = await getMovies();
+
         setMovies(data.slice(0, 10));
       } catch (error) {
         console.log(error);
@@ -66,9 +73,7 @@ function Home() {
   }, [movieName]);
 
   return (
-    <div>
-      <h1>Movies</h1>
-
+    <div className="home">
       <SearchBar
         value={movieName}
         onChange={setMovieName}
@@ -76,12 +81,15 @@ function Home() {
         loading={loading}
       />
 
-      <main ref={moviesRef}>
+      <main
+        ref={moviesRef}
+        className="movies-section"
+      >
         <h2>Now Showing</h2>
 
-        {loading && <p>Loading...</p>}
+        {loading && <p className="loading-text">Loading...</p>}
 
-        <div className="movies-grid">
+        <div className="movie-cards-grid">
           {movies.map((movie) => (
             <MovieCard
               key={movie.id}

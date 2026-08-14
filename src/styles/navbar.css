@@ -1,0 +1,173 @@
+.navbar {
+  position: sticky;
+
+  top: 0;
+
+  z-index: 1000;
+
+  width: 100%;
+
+  background: var(--card-bg);
+
+  border-bottom: 1px solid var(--border-color);
+
+  backdrop-filter: blur(15px);
+
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.navbar-container {
+  width: 100%;
+
+  max-width: 1400px;
+
+  min-height: 80px;
+
+  margin: 0 auto;
+
+  padding: 12px 25px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 30px;
+}
+
+/* LOGO */
+
+.navbar-logo {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  flex-shrink: 0;
+
+  cursor: pointer;
+}
+
+.logo-icon {
+  font-size: 28px;
+}
+
+.logo-text {
+  font-size: 24px;
+
+  font-weight: 800;
+
+  letter-spacing: -0.8px;
+
+  background: linear-gradient(
+    135deg,
+    #ff6b6b,
+    #ffa06b
+  );
+
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+
+  background-clip: text;
+}
+
+/* SEARCH */
+
+.navbar-search {
+  flex: 1;
+
+  display: flex;
+
+  justify-content: center;
+
+  min-width: 0;
+}
+
+/* Remove SearchBar's large spacing inside navbar */
+
+.navbar-search .search-container {
+  width: 100%;
+
+  max-width: 720px;
+
+  padding: 0;
+}
+
+.navbar-search .search-wrapper {
+  max-width: 720px;
+}
+
+/* ACTIONS */
+
+.navbar-actions {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .navbar-container {
+    gap: 18px;
+
+    padding: 10px 18px;
+  }
+
+  .logo-text {
+    font-size: 21px;
+  }
+
+  .logo-icon {
+    font-size: 24px;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 650px) {
+  .navbar-container {
+    min-height: auto;
+
+    padding: 12px;
+
+    display: grid;
+
+    grid-template-columns: 1fr auto;
+
+    gap: 12px;
+  }
+
+  .navbar-logo {
+    grid-column: 1;
+  }
+
+  .navbar-actions {
+    grid-column: 2;
+  }
+
+  .navbar-search {
+    grid-column: 1 / -1;
+
+    grid-row: 2;
+  }
+
+  .navbar-search .search-container {
+    padding: 0;
+  }
+
+  .logo-text {
+    font-size: 20px;
+  }
+
+  .logo-icon {
+    font-size: 23px;
+  }
+}
