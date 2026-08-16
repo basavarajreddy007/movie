@@ -1,61 +1,49 @@
 :root {
-  --bg-color: #ffffff;
-  --bg-gradient: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    #f5f5f5 50%,
-    #eeeeee 100%
-  );
-
-  --text-color: #111111;
-  --text-light: #222222;
-  --text-muted: #666666;
+  --bg-color: #f4f6fa;
+  --bg-gradient: #f4f6fa;
+  --text-color: #080B15;
+  --text-light: #080B15;
+  --text-muted: #5a6275;
 
   --card-bg: #ffffff;
-  --border-color: #dddddd;
+  --border-color: #e2e8f0;
 
   --input-bg: #ffffff;
-  --input-text: #111111;
+  --input-text: #080B15;
 
-  --image-bg: #eeeeee;
+  --image-bg: #e2e8f0;
 
-  --overlay-bg: rgba(0, 0, 0, 0.55);
+  --overlay-bg: rgba(8, 11, 21, 0.45);
   --play-bg: rgba(255, 255, 255, 0.9);
   --rating-bg: rgba(255, 255, 255, 0.95);
 
-  --shadow-color: rgba(0, 0, 0, 0.15);
+  --shadow-color: rgba(8, 11, 21, 0.08);
 
-  --primary-color: #ff6b6b;
-  --primary-light: #ff8787;
+  --primary-color: #FF3D68;
+  --primary-light: #FF5E80;
 }
 
 [data-theme="dark"] {
-  --bg-color: #0a0e27;
+  --bg-color: #080B15;
+  --bg-gradient: #080B15;
 
-  --bg-gradient: linear-gradient(
-    135deg,
-    #0a0e27 0%,
-    #1a1f3a 50%,
-    #0f1628 100%
-  );
+  --text-color: #FFFFFF;
+  --text-light: #FFFFFF;
+  --text-muted: #A0A7B8;
 
-  --text-color: #ffffff;
-  --text-light: #e0e0e0;
-  --text-muted: #a0a0a0;
+  --card-bg: #121625;
+  --border-color: rgba(255, 255, 255, 0.08);
 
-  --card-bg: #14192f;
-  --border-color: rgba(80, 90, 150, 0.3);
+  --input-bg: #0F1322;
+  --input-text: #FFFFFF;
 
-  --input-bg: rgba(15, 22, 40, 0.9);
-  --input-text: #ffffff;
+  --image-bg: #0F1322;
 
-  --image-bg: #151b35;
+  --overlay-bg: rgba(8, 11, 21, 0.7);
+  --play-bg: rgba(15, 19, 34, 0.9);
+  --rating-bg: rgba(15, 19, 34, 0.95);
 
-  --overlay-bg: rgba(10, 14, 39, 0.55);
-  --play-bg: rgba(10, 14, 39, 0.9);
-  --rating-bg: rgba(10, 14, 39, 0.95);
-
-  --shadow-color: rgba(0, 0, 0, 0.4);
+  --shadow-color: rgba(0, 0, 0, 0.6);
 }
 
 html,
@@ -70,15 +58,12 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg-gradient);
+  background: var(--bg-color);
   color: var(--text-color);
-  transition:
-    background 0.35s ease,
-    color 0.35s ease;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 #root {
   min-height: 100vh;
-  background: var(--bg-gradient);
-  transition: background 0.35s ease;
+  background: var(--bg-color);
 }

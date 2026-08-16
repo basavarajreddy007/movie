@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./home";
 import MovieDetails from "./components/movieDetails";
+import Bookmarks from "./bookmarks";
 import { Navbar } from "./components/navbar";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           element={<Home searchCallbackRef={searchCallbackRef} />} 
         />
         <Route path="/movie/:id" element={<MovieDetails />} />
+        <Route path="/bookmarks" element={<Bookmarks />} />
       </Routes>
     </BrowserRouter>
   );

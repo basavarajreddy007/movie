@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Search, Loader2 } from "./icons";
 import "../styles/SearchBar.css";
 
 type Props = {
@@ -47,8 +48,15 @@ export function SearchBar({
           className="search-button"
           onClick={onSearch}
           disabled={loading || !value.trim()}
+          aria-label="Search"
+          title="Search"
         >
-          {loading ? "Searching..." : "Search"}
+          {loading ? (
+            <Loader2 className="animate-spin" size={16} />
+          ) : (
+            <Search size={16} />
+          )}
+          <span>{loading ? "Searching..." : "Search"}</span>
         </button>
       </div>
     </div>

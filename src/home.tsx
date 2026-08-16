@@ -3,7 +3,7 @@ import {
   useRef,
   useEffect,
 } from "react";
-
+import { Film, Loader2, AlertCircle, SearchX } from "./components/icons";
 import type { Movie } from "./types/movies";
 import { getMovies } from "./service/movieapi";
 import { MovieCard } from "./components/MovieCard";
@@ -15,6 +15,7 @@ type Props = {
 function Home({ searchCallbackRef }: Props) {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const moviesRef = useRef<HTMLElement>(null);
 
@@ -24,17 +25,17 @@ function Home({ searchCallbackRef }: Props) {
     }
 
     setLoading(true);
+    setError(null);
 
     try {
       const data = await getMovies(query);
-
       setMovies(data.slice(0, 30));
 
       moviesRef.current?.scrollIntoView({
         behavior: "smooth",
       });
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load movies.");
       setMovies([]);
     } finally {
       setLoading(false);
@@ -50,13 +51,13 @@ function Home({ searchCallbackRef }: Props) {
   useEffect(() => {
     const loadPopularMovies = async () => {
       setLoading(true);
+      setError(null);
 
       try {
         const data = await getMovies();
-
         setMovies(data.slice(0, 10));
-      } catch (error) {
-        console.log(error);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load movies.");
         setMovies([]);
       } finally {
         setLoading(false);
@@ -72,9 +73,31 @@ function Home({ searchCallbackRef }: Props) {
         ref={moviesRef}
         className="movies-section"
       >
-        <h2>Now Showing</h2>
+        <h2 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <Film size={22} />
+          <span>Now Showing</span>
+        </h2>
 
-        {loading && <p className="loading-text">Loading...</p>}
+        {loading && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "2rem 0" }}>
+            <Loader2 className="animate-spin" size={20} />
+            <p className="loading-text" style={{ margin: 0 }}>Loading movies...</p>
+          </div>
+        )}
+
+        {error && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#ef4444", padding: "1rem 0" }}>
+            <AlertCircle size={20} />
+            <p className="error-text" style={{ margin: 0 }}>{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && movies.length === 0 && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "2rem 0", color: "var(--text-muted)" }}>
+            <SearchX size={20} />
+            <p className="no-results" style={{ margin: 0 }}>No movies found.</p>
+          </div>
+        )}
 
         <div className="movie-cards-grid">
           {movies.map((movie) => (
