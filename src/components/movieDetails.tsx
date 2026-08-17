@@ -142,20 +142,6 @@ function MovieDetails() {
               <Play size={18} fill="currentColor" />
               <span>Watch Now</span>
             </button>
-            <button
-              className={`details-bookmark-button ${bookmarked ? "bookmarked" : ""}`}
-              type="button"
-              onClick={handleBookmarkToggle}
-              aria-label={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-              title={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-            >
-              <Bookmark
-                size={18}
-                fill={bookmarked ? "currentColor" : "none"}
-                stroke="currentColor"
-              />
-              <span>{bookmarked ? "Bookmarked" : "Bookmark"}</span>
-            </button>
           </div>
 
         </div>
