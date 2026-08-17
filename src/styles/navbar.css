@@ -18,6 +18,7 @@
   padding: 12px 24px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 28px;
   min-height: 72px;
   position: relative;
@@ -90,6 +91,7 @@
   min-width: 0;
   max-width: 520px;
   margin: 0 auto;
+  position: relative;
 }
 
 .navbar-search .search-container {
@@ -101,19 +103,6 @@
 .navbar-search .search-wrapper {
   width: 100%;
   max-width: 100%;
-}
-
-.navbar-search .search-input {
-  height: 44px;
-  font-size: 14px;
-  padding: 0 18px;
-}
-
-.navbar-search .search-button {
-  height: 44px;
-  font-size: 14px;
-  padding: 0 18px;
-  width: auto;
 }
 
 .navbar-actions {
@@ -272,18 +261,6 @@
     max-width: 400px;
   }
 
-  .navbar-search .search-input {
-    height: 40px;
-    font-size: 13px;
-    padding: 0 14px;
-  }
-
-  .navbar-search .search-button {
-    height: 40px;
-    font-size: 13px;
-    padding: 0 14px;
-  }
-
   .nav-link {
     height: 40px;
     padding: 0 14px;
@@ -333,17 +310,6 @@
     letter-spacing: 1px;
   }
 
-  .navbar-search .search-input {
-    height: 38px;
-    font-size: 13px;
-  }
-
-  .navbar-search .search-button {
-    height: 38px;
-    font-size: 12px;
-    padding: 0 14px;
-  }
-
   .mobile-menu-dropdown {
     right: 16px;
     left: auto;
@@ -362,18 +328,6 @@
     letter-spacing: 0.8px;
   }
 
-  .navbar-search .search-input {
-    height: 36px;
-    font-size: 12px;
-    padding: 0 12px;
-  }
-
-  .navbar-search .search-button {
-    height: 36px;
-    font-size: 11px;
-    padding: 0 10px;
-  }
-
   .mobile-menu-dropdown {
     right: 12px;
     width: min(230px, calc(100vw - 24px));
@@ -388,18 +342,6 @@
   .logo-text {
     font-size: 14px;
     letter-spacing: 0.5px;
-  }
-
-  .navbar-search .search-input {
-    height: 34px;
-    font-size: 11px;
-    padding: 0 10px;
-  }
-
-  .navbar-search .search-button {
-    height: 34px;
-    font-size: 10.5px;
-    padding: 0 8px;
   }
 
   .mobile-menu-dropdown {

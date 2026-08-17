@@ -3,7 +3,7 @@ import {
   useRef,
   useEffect,
 } from "react";
-import { Film, Loader2, AlertCircle, SearchX } from "./components/icons";
+import {  Loader2, AlertCircle, SearchX } from "./components/icons";
 import type { Movie } from "./types/movies";
 import { getMovies } from "./service/movieapi";
 import { MovieCard } from "./components/MovieCard";
@@ -29,7 +29,7 @@ function Home({ searchCallbackRef }: Props) {
 
     try {
       const data = await getMovies(query);
-      setMovies(data.slice(0, 30));
+      setMovies(data.slice(0, 50));
 
       moviesRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -55,7 +55,7 @@ function Home({ searchCallbackRef }: Props) {
 
       try {
         const data = await getMovies();
-        setMovies(data.slice(0, 10));
+        setMovies(data.slice(0, 15));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load movies.");
         setMovies([]);
@@ -74,7 +74,7 @@ function Home({ searchCallbackRef }: Props) {
         className="movies-section"
       >
         <h2 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Film size={22} />
+         
           <span>Now Showing</span>
         </h2>
 

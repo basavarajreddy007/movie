@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Play, Star, Calendar, AlertCircle, Loader2 } from "./icons";
+import { Play, Star, Calendar, AlertCircle, Loader2, Bookmark } from "./icons";
 import type { Movie } from "../types/movies";
 import { getMovieById } from "../service/movieapi";
+import { isBookmarked, toggleBookmark } from "../utils/bookmarks";
 import "../styles/movieDetails.css";
 
 function MovieDetails() {
@@ -11,6 +12,7 @@ function MovieDetails() {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookmarked, setBookmarked] = useState(false);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -22,6 +24,7 @@ function MovieDetails() {
       try {
         const data = await getMovieById(id);
         setMovie(data);
+        setBookmarked(isBookmarked(data.id));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch movie details.");
       } finally {
@@ -31,6 +34,25 @@ function MovieDetails() {
 
     fetchMovie();
   }, [id]);
+
+  useEffect(() => {
+    const updateBookmarkState = () => {
+      if (movie) {
+        setBookmarked(isBookmarked(movie.id));
+      }
+    };
+
+    window.addEventListener("bookmarksUpdated", updateBookmarkState);
+    return () => {
+      window.removeEventListener("bookmarksUpdated", updateBookmarkState);
+    };
+  }, [movie]);
+
+  const handleBookmarkToggle = () => {
+    if (!movie) return;
+    const newState = toggleBookmark(movie);
+    setBookmarked(newState);
+  };
 
   if (loading) {
     return (
@@ -72,6 +94,19 @@ function MovieDetails() {
             src={posterUrl}
             alt={movie.title || "Movie poster"}
           />
+          <button
+            type="button"
+            className={`poster-bookmark-btn ${bookmarked ? "bookmarked" : ""}`}
+            onClick={handleBookmarkToggle}
+            aria-label={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+            title={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+          >
+            <Bookmark
+              size={18}
+              fill={bookmarked ? "currentColor" : "none"}
+              stroke="currentColor"
+            />
+          </button>
         </div>
 
         <div className="movie-info">
@@ -106,6 +141,20 @@ function MovieDetails() {
             <button className="watch-button" type="button" aria-label="Watch Now" title="Watch Now">
               <Play size={18} fill="currentColor" />
               <span>Watch Now</span>
+            </button>
+            <button
+              className={`details-bookmark-button ${bookmarked ? "bookmarked" : ""}`}
+              type="button"
+              onClick={handleBookmarkToggle}
+              aria-label={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+              title={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+            >
+              <Bookmark
+                size={18}
+                fill={bookmarked ? "currentColor" : "none"}
+                stroke="currentColor"
+              />
+              <span>{bookmarked ? "Bookmarked" : "Bookmark"}</span>
             </button>
           </div>
 

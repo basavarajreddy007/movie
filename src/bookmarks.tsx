@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Bookmark, Film } from "./components/icons";
+import { Bookmark } from "./components/icons";
 import type { Movie } from "./types/movies";
 import { getBookmarks } from "./utils/bookmarks";
 import { MovieCard } from "./components/MovieCard";
@@ -53,7 +53,7 @@ function Bookmarks() {
                 fontWeight: 600,
               }}
             >
-              <Film size={18} />
+              
               <span>Browse Movies</span>
             </Link>
           </div>

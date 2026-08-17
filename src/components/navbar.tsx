@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bookmark, Menu, X } from "./icons";
 import { SearchBar } from "./SearchBar";
+import { ThemeSwitch } from "./ThemeSwitch";
 import { getBookmarks } from "../utils/bookmarks";
 import "../styles/navbar.css";
-import "../styles/themeToggle.css";
 
 type Props = {
   darkMode: boolean;
@@ -21,6 +21,7 @@ export function Navbar({
   const [bookmarkCount, setBookmarkCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -46,8 +47,13 @@ export function Navbar({
 
   const handleSearch = () => {
     const query = searchValue.trim();
-    if (query && onSearch) {
-      onSearch(query);
+    if (query) {
+      if (location.pathname !== "/") {
+        navigate("/");
+      }
+      if (onSearch) {
+        onSearch(query);
+      }
     }
   };
 
@@ -56,6 +62,8 @@ export function Navbar({
     setIsMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const isMovieDetailPage = location.pathname.startsWith("/movie");
 
   return (
     <nav className="navbar">
@@ -82,13 +90,15 @@ export function Navbar({
           </span>
         </Link>
 
-        <div className="navbar-search">
-          <SearchBar
-            value={searchValue}
-            onChange={setSearchValue}
-            onSearch={handleSearch}
-          />
-        </div>
+        {!isMovieDetailPage && (
+          <div className="navbar-search">
+            <SearchBar
+              value={searchValue}
+              onChange={setSearchValue}
+              onSearch={handleSearch}
+            />
+          </div>
+        )}
 
         <div className="navbar-actions desktop-actions">
           <Link
@@ -104,39 +114,7 @@ export function Navbar({
             )}
           </Link>
 
-          <label className="theme-switch" title={darkMode ? "Switch to light mode" : "Switch to dark mode"}>
-            <input
-              type="checkbox"
-              className="theme-switch__checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode((prev) => !prev)}
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            />
-            <div className="theme-switch__container">
-              <div className="theme-switch__circle-container">
-                <div className="theme-switch__sun-moon-container">
-                  <div className="theme-switch__moon">
-                    <div className="theme-switch__spot" />
-                    <div className="theme-switch__spot" />
-                    <div className="theme-switch__spot" />
-                  </div>
-                </div>
-              </div>
-              <div className="theme-switch__clouds" />
-              <div className="theme-switch__stars-container">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 144 55"
-                  fill="none"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M138.5 18.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm-20-10a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm-35 25a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm-60-15a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm105 10a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm-80-20a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zM12 8a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm30 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zm50-10a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm25 20a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </label>
+          <ThemeSwitch darkMode={darkMode} setDarkMode={setDarkMode} />
         </div>
 
         <button
@@ -168,39 +146,7 @@ export function Navbar({
 
           <div className="mobile-menu-item mobile-theme-item">
             <span className="mobile-menu-label">Theme</span>
-            <label className="theme-switch" title={darkMode ? "Switch to light mode" : "Switch to dark mode"}>
-              <input
-                type="checkbox"
-                className="theme-switch__checkbox"
-                checked={darkMode}
-                onChange={() => setDarkMode((prev) => !prev)}
-                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              />
-              <div className="theme-switch__container">
-                <div className="theme-switch__circle-container">
-                  <div className="theme-switch__sun-moon-container">
-                    <div className="theme-switch__moon">
-                      <div className="theme-switch__spot" />
-                      <div className="theme-switch__spot" />
-                      <div className="theme-switch__spot" />
-                    </div>
-                  </div>
-                </div>
-                <div className="theme-switch__clouds" />
-                <div className="theme-switch__stars-container">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 144 55"
-                    fill="none"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M138.5 18.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm-20-10a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm-35 25a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm-60-15a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm105 10a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zm-80-20a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1h2zM12 8a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm30 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zm50-10a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V9a1 1 0 0 1 1-1zm25 20a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1z"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </label>
+            <ThemeSwitch darkMode={darkMode} setDarkMode={setDarkMode} />
           </div>
         </div>
       )}
