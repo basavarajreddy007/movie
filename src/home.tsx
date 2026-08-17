@@ -1,112 +1,128 @@
 import {
-  useState,
-  useRef,
+  useCallback,
   useEffect,
+  useRef,
+  useState,
 } from "react";
-import {  Loader2, AlertCircle, SearchX } from "./components/icons";
+import { useSearchParams } from "react-router-dom";
+import { AlertCircle, SearchX } from "./components/icons";
 import type { Movie } from "./types/movies";
 import { getMovies } from "./service/movieapi";
 import { MovieCard } from "./components/MovieCard";
+import { Loader } from "./components/Loader";
 
-type Props = {
-  searchCallbackRef?: React.MutableRefObject<((query: string) => void) | null>;
-};
-
-function Home({ searchCallbackRef }: Props) {
+function Home() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchParams] = useSearchParams();
+
   const moviesRef = useRef<HTMLElement>(null);
 
-  const searchMovies = async (query: string) => {
-    if (!query.trim()) {
-      return;
-    }
+  const query = searchParams.get("q")?.trim() ?? "";
 
+  const fetchMovies = useCallback(async (searchQuery?: string) => {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await getMovies(query);
-      setMovies(data.slice(0, 50));
+      const data = await getMovies(searchQuery);
 
-      moviesRef.current?.scrollIntoView({
-        behavior: "smooth",
-      });
+      setMovies(
+        data.slice(0, searchQuery ? 50 : 20)
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load movies.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load movies."
+      );
+
       setMovies([]);
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (searchCallbackRef) {
-      searchCallbackRef.current = searchMovies;
-    }
-  }, [searchCallbackRef]);
-
-  useEffect(() => {
-    const loadPopularMovies = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const data = await getMovies();
-        setMovies(data.slice(0, 15));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load movies.");
-        setMovies([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPopularMovies();
   }, []);
 
+  useEffect(() => {
+    fetchMovies(query || undefined);
+
+    if (query) {
+      requestAnimationFrame(() => {
+        moviesRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    }
+  }, [query, fetchMovies]);
+
   return (
-    <div className="home">
+    <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#080B15] text-slate-900 dark:text-white transition-colors duration-200">
       <main
         ref={moviesRef}
-        className="movies-section"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10"
       >
-        <h2 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-         
-          <span>Now Showing</span>
-        </h2>
+        <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <span className="w-2.5 h-6 rounded-full bg-gradient-to-b from-[#FF3D68] to-[#FFA06B]" />
+
+            <span>
+              {query
+                ? `Search results for "${query}"`
+                : "Now Showing"}
+            </span>
+          </h2>
+        </div>
 
         {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "2rem 0" }}>
-            <Loader2 className="animate-spin" size={20} />
-            <p className="loading-text" style={{ margin: 0 }}>Loading movies...</p>
-          </div>
+          <Loader
+            title="Discovering Movies"
+            badge="NOW SHOWING"
+            dynamicMessages={[
+              "Dimming the cinema lights...",
+              "Rolling the 35mm film reels...",
+              "Curating top-rated blockbusters...",
+              "Fetching latest cinema releases...",
+              "Grabbing the popcorn & drinks...",
+            ]}
+            size="lg"
+          />
         )}
 
         {error && (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#ef4444", padding: "1rem 0" }}>
-            <AlertCircle size={20} />
-            <p className="error-text" style={{ margin: 0 }}>{error}</p>
+          <div className="flex items-center justify-center gap-3 py-6 px-4 mb-8 text-red-500 font-medium text-base bg-red-500/10 rounded-2xl border border-red-500/20 max-w-xl mx-auto">
+            <AlertCircle size={22} />
+            <span>{error}</span>
           </div>
         )}
 
         {!loading && !error && movies.length === 0 && (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "2rem 0", color: "var(--text-muted)" }}>
-            <SearchX size={20} />
-            <p className="no-results" style={{ margin: 0 }}>No movies found.</p>
+          <div className="flex flex-col items-center justify-center gap-3 py-24 text-slate-500 dark:text-slate-400">
+            <SearchX
+              size={40}
+              className="text-[#FF3D68] opacity-60"
+            />
+
+            <p className="text-base font-medium">
+              {query
+                ? `No movies found for "${query}".`
+                : "No movies found."}
+            </p>
           </div>
         )}
 
-        <div className="movie-cards-grid">
-          {movies.map((movie) => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-            />
-          ))}
-        </div>
+        {!loading && !error && movies.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-6">
+            {movies.map((movie) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+              />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

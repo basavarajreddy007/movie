@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Play, Star, Calendar, AlertCircle, Loader2, Bookmark } from "./icons";
+import { Play, Star, Calendar, AlertCircle, Bookmark } from "./icons";
 import type { Movie } from "../types/movies";
 import { getMovieById } from "../service/movieapi";
 import { isBookmarked, toggleBookmark } from "../utils/bookmarks";
-import "../styles/movieDetails.css";
+import { Loader } from "./Loader";
 
 function MovieDetails() {
   const { id } = useParams<{ id: string }>();
@@ -56,21 +56,28 @@ function MovieDetails() {
 
   if (loading) {
     return (
-      <main className="movie-page">
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", padding: "4rem 1rem" }}>
-          <Loader2 className="animate-spin" size={24} />
-          <p className="loading" style={{ margin: 0 }}>Loading details...</p>
-        </div>
+      <main className="w-full min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-16 bg-[#f4f6fa] dark:bg-[#080B15] transition-colors duration-200">
+        <Loader
+          title="Loading Movie Details"
+          badge="CINEMA PREVIEW"
+          dynamicMessages={[
+            "Fetching movie lore & ratings...",
+            "Retrieving high-res poster artwork...",
+            "Loading storyline and cast...",
+            "Almost ready for showtime...",
+          ]}
+          size="lg"
+        />
       </main>
     );
   }
 
   if (error || !movie) {
     return (
-      <main className="movie-page">
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", padding: "4rem 1rem", color: "#ef4444" }}>
+      <main className="w-full min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-16 bg-[#f4f6fa] dark:bg-[#080B15] transition-colors duration-200">
+        <div className="flex items-center gap-2.5 text-red-500 font-medium text-base">
           <AlertCircle size={24} />
-          <p className="error-text" style={{ margin: 0 }}>{error || "Movie not found."}</p>
+          <span>{error || "Movie not found."}</span>
         </div>
       </main>
     );
@@ -85,18 +92,22 @@ function MovieDetails() {
     : "N/A";
 
   return (
-    <main className="movie-page">
-      <div className="movie-details">
-
-        <div className="poster-wrapper">
+    <main className="w-full min-h-[calc(100vh-72px)] px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-[#f4f6fa] dark:bg-[#080B15] transition-colors duration-200">
+      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-8 md:gap-12 items-start">
+        {/* Movie Poster Card */}
+        <div className="relative w-full max-w-[280px] md:max-w-none aspect-[2/3] mx-auto overflow-hidden rounded-2xl bg-slate-200 dark:bg-[#0F1322] border border-slate-200 dark:border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 group">
           <img
-            className="movie-poster"
+            className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
             src={posterUrl}
             alt={movie.title || "Movie poster"}
           />
           <button
             type="button"
-            className={`poster-bookmark-btn ${bookmarked ? "bookmarked" : ""}`}
+            className={`absolute top-3.5 right-3.5 z-10 flex items-center justify-center w-10 h-10 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 ${
+              bookmarked
+                ? "bg-[#FF3D68] border-[#FF3D68] text-white shadow-lg shadow-[#FF3D68]/40"
+                : "border-white/20 bg-black/60 text-white hover:bg-[#FF3D68] hover:border-[#FF3D68]"
+            }`}
             onClick={handleBookmarkToggle}
             aria-label={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
             title={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
@@ -109,41 +120,51 @@ function MovieDetails() {
           </button>
         </div>
 
-        <div className="movie-info">
-
-          <span className="movie-label">
+        {/* Movie Information & Actions */}
+        <div className="w-full flex flex-col items-start">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-widest bg-[#FF3D68]/10 border border-[#FF3D68]/25 text-[#FF3D68] mb-3">
             MOVIE DETAILS
           </span>
 
-          <h1>{movie.title}</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight mb-4">
+            {movie.title}
+          </h1>
 
-          <div className="movie-meta">
-            <span className="rating" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <Star size={16} fill="currentColor" />
+          <div className="flex flex-wrap items-center gap-3 mb-5">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#FF3D68]/30 bg-[#FF3D68]/10 text-[#FF3D68] text-sm font-bold">
+              <Star size={15} fill="currentColor" />
               {rating} / 10
             </span>
 
-            <span className="release-date" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-              <Calendar size={15} />
-              {movie.release_date || "Release date unavailable"}
-            </span>
+            {movie.release_date && (
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
+                <Calendar size={15} />
+                {movie.release_date}
+              </span>
+            )}
           </div>
 
-          <div className="divider" />
+          <div className="w-full h-px bg-gradient-to-r from-slate-200 dark:from-white/10 to-transparent my-4" />
 
-          <h2>Overview</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2">
+            Overview
+          </h2>
 
-          <p className="overview">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
             {movie.overview || "No overview available for this movie."}
           </p>
 
-          <div className="movie-actions">
-            <button className="watch-button" type="button" aria-label="Watch Now" title="Watch Now">
+          <div className="w-full flex items-center gap-3">
+            <button
+              className="inline-flex items-center justify-center gap-2 h-11 sm:h-12 px-6 rounded-xl font-bold text-sm sm:text-base text-white bg-gradient-to-r from-[#FF3D68] to-[#FF5E80] shadow-lg shadow-[#FF3D68]/30 hover:brightness-110 hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+              type="button"
+              aria-label="Watch Now"
+              title="Watch Now"
+            >
               <Play size={18} fill="currentColor" />
               <span>Watch Now</span>
             </button>
           </div>
-
         </div>
       </div>
     </main>
