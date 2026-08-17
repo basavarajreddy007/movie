@@ -29,7 +29,6 @@ export function SearchBar({
   const cacheRef = useRef<Map<string, Movie[]>>(new Map());
   const navigate = useNavigate();
 
-  // Fetch suggestions with debouncing and memory caching
   useEffect(() => {
     const trimmed = value.trim();
 
@@ -41,7 +40,6 @@ export function SearchBar({
       return;
     }
 
-    // Check memory cache first
     const cached = cacheRef.current.get(trimmed.toLowerCase());
     if (cached) {
       setSuggestions(cached);
@@ -58,7 +56,6 @@ export function SearchBar({
       try {
         const results = await getMovies(trimmed);
         if (isCurrent) {
-          // Filter valid movies with title and unique ID
           const seen = new Set<number>();
           const filtered = results.filter((m) => {
             if (!m || !m.id || !m.title || seen.has(m.id)) return false;
@@ -89,7 +86,6 @@ export function SearchBar({
     };
   }, [value]);
 
-  // Click outside listener to close dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -156,7 +152,6 @@ export function SearchBar({
     }
   };
 
-  // Scroll active keyboard item into view
   useEffect(() => {
     if (selectedIndex >= 0 && listRef.current) {
       const items = listRef.current.querySelectorAll("li");
@@ -168,7 +163,6 @@ export function SearchBar({
     }
   }, [selectedIndex]);
 
-  // Highlight query matches in suggestion titles
   const renderHighlightedTitle = (title: string, query: string) => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return title;

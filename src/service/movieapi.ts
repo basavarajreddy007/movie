@@ -106,7 +106,6 @@ export const getMovies = async (
       console.warn("Random homepage fetch failed, falling back to popular page 1:", randomPageError);
     }
 
-    // Fallback to standard popular movies page 1
     const fallbackUrl = `${TMDB_BASE_URL}/movie/popular?page=1`;
     const fallbackMovies = await fetchMoviesFromUrl(fallbackUrl);
 

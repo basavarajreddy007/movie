@@ -94,7 +94,6 @@ function MovieDetails() {
   return (
     <main className="w-full min-h-[calc(100vh-72px)] px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-[#f4f6fa] dark:bg-[#080B15] transition-colors duration-200">
       <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-8 md:gap-12 items-start">
-        {/* Movie Poster Card */}
         <div className="relative w-full max-w-[280px] md:max-w-none aspect-[2/3] mx-auto overflow-hidden rounded-2xl bg-slate-200 dark:bg-[#0F1322] border border-slate-200 dark:border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 group">
           <img
             className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
@@ -120,7 +119,6 @@ function MovieDetails() {
           </button>
         </div>
 
-        {/* Movie Information & Actions */}
         <div className="w-full flex flex-col items-start">
           <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-widest bg-[#FF3D68]/10 border border-[#FF3D68]/25 text-[#FF3D68] mb-3">
             MOVIE DETAILS

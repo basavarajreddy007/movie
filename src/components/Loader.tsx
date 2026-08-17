@@ -7,9 +7,6 @@ export interface SpinnerProps {
   strokeWidth?: number;
 }
 
-/**
- * Uiverse.io animated SVG spinner based on SelfMadeSystem keyframes
- */
 export function UiverseSpinner({
   size = 48,
   className = "",
@@ -44,7 +41,6 @@ export function UiverseSpinner({
           </linearGradient>
         </defs>
 
-        {/* Muted Track Circle */}
         <circle
           cx="60"
           cy="60"
@@ -55,7 +51,6 @@ export function UiverseSpinner({
           className="opacity-15 dark:opacity-20 text-slate-400 dark:text-slate-500"
         />
 
-        {/* Dash Animation Circle */}
         <circle
           className="dash"
           cx="60"
@@ -68,7 +63,6 @@ export function UiverseSpinner({
           pathLength="360"
         />
 
-        {/* Spin Dash Animation Circle */}
         <circle
           className="spin"
           cx="60"
@@ -94,21 +88,13 @@ const DEFAULT_DYNAMIC_MESSAGES = [
 ];
 
 export interface LoaderProps {
-  /** Main heading/title (e.g. "Loading movies...") */
   title?: string;
-  /** Fixed subtitle or description */
   subtitle?: string;
-  /** Badge text shown in a capsule badge above the title */
   badge?: string;
-  /** Array of rotating cinema messages to cycle through */
   dynamicMessages?: string[];
-  /** Size preset for the loader component */
   size?: "xs" | "sm" | "md" | "lg" | "fullscreen";
-  /** Whether to show ambient soft glowing background aura */
   showGlow?: boolean;
-  /** Additional container styling class names */
   className?: string;
-  /** Compact inline presentation for small blocks/cards */
   inline?: boolean;
 }
 
@@ -139,7 +125,6 @@ export function Loader({
       ? dynamicMessages[currentMessageIndex]
       : undefined);
 
-  // Dimension mapping
   const spinnerSize =
     size === "xs"
       ? 18
@@ -153,7 +138,6 @@ export function Loader({
 
   const strokeWidth = size === "xs" || size === "sm" ? 9 : 7;
 
-  // Inline / minimal compact mode (e.g. for buttons or tight search dropdowns)
   if (inline || size === "xs") {
     return (
       <div
@@ -167,7 +151,6 @@ export function Loader({
     );
   }
 
-  // Small size mode
   if (size === "sm") {
     return (
       <div
@@ -205,7 +188,6 @@ export function Loader({
       role="status"
       aria-live="polite"
     >
-      {/* Ambient glowing backdrop */}
       <div className="relative flex items-center justify-center mb-6">
         {showGlow && (
           <div
@@ -219,7 +201,6 @@ export function Loader({
         <UiverseSpinner size={spinnerSize} strokeWidth={strokeWidth} />
       </div>
 
-      {/* Badge */}
       {badge && (
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest bg-[#FF3D68]/10 dark:bg-[#FF3D68]/15 border border-[#FF3D68]/30 text-[#FF3D68] mb-3 shadow-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-[#FF3D68] animate-pulse" />
@@ -227,12 +208,10 @@ export function Loader({
         </div>
       )}
 
-      {/* Main Title */}
       <h3 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white mb-2">
         {title}
       </h3>
 
-      {/* Dynamic Subtitle / Message */}
       {displayedSubtitle && (
         <div className="min-h-[1.5rem] flex items-center justify-center">
           <p
@@ -244,7 +223,6 @@ export function Loader({
         </div>
       )}
 
-      {/* Pulsing cinema dot indicators */}
       <div className="flex items-center gap-1.5 mt-4 opacity-75">
         <span className="w-1.5 h-1.5 rounded-full bg-[#FF3D68] loader-dot-pulse" />
         <span className="w-1.5 h-1.5 rounded-full bg-[#FFA06B] loader-dot-pulse" />
