@@ -11,7 +11,11 @@ import { getMovies } from "./service/movieapi";
 import { MovieCard } from "./components/MovieCard";
 import { Loader } from "./components/Loader";
 
-function Home() {
+type HomeProps = {
+  searchCallbackRef?: React.RefObject<((query: string) => void) | null>;
+};
+
+function Home({ searchCallbackRef }: HomeProps = {}) {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

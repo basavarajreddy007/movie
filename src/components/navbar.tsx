@@ -8,11 +8,13 @@ import { getBookmarks } from "../utils/bookmarks";
 type Props = {
   darkMode: boolean;
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+  onSearch?: (query: string) => void;
 };
 
 export function Navbar({
   darkMode,
   setDarkMode,
+  onSearch,
 }: Props) {
   const [searchValue, setSearchValue] = useState("");
   const [bookmarkCount, setBookmarkCount] = useState(0);

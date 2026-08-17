@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Bookmark, Play, Star } from "./icons";
 import type { Movie } from "../types/movies";
@@ -13,6 +13,21 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
   const [bookmarked, setBookmarked] = useState(() =>
     isBookmarked(movie.id)
   );
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setBookmarked(isBookmarked(movie.id));
+    setImageError(false);
+
+    const handleBookmarkUpdate = () => {
+      setBookmarked(isBookmarked(movie.id));
+    };
+
+    window.addEventListener("bookmarksUpdated", handleBookmarkUpdate);
+    return () => {
+      window.removeEventListener("bookmarksUpdated", handleBookmarkUpdate);
+    };
+  }, [movie.id]);
 
   const handleBookmarkClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -20,7 +35,6 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
       e.stopPropagation();
 
       const newState = toggleBookmark(movie);
-
       setBookmarked(newState);
       onBookmarkToggle?.();
     },
@@ -28,45 +42,57 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
   );
 
   const rating =
+    typeof movie.vote_average === "number" &&
+    !Number.isNaN(movie.vote_average) &&
     movie.vote_average > 0
       ? movie.vote_average.toFixed(1)
       : "N/A";
 
-  const releaseYear = movie.release_date
-    ? new Date(movie.release_date).getFullYear()
-    : "N/A";
+  const getReleaseYear = (dateStr?: string): string => {
+    if (!dateStr) return "N/A";
+    const parsedYear = new Date(dateStr).getFullYear();
+    if (!Number.isNaN(parsedYear)) {
+      return String(parsedYear);
+    }
+    const match = dateStr.match(/^\d{4}/);
+    return match ? match[0] : "N/A";
+  };
 
-  const posterUrl = movie.poster_path
-    ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
-    : null;
+  const releaseYear = getReleaseYear(movie.release_date);
+
+  const posterUrl =
+    movie.poster_path && !imageError
+      ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
+      : null;
 
   return (
     <Link
       to={`/movie/${movie.id}`}
       className="group block h-full select-none"
+      title={movie.title || "Movie details"}
     >
       <article className="relative h-full flex flex-col justify-between overflow-hidden rounded-2xl bg-white dark:bg-[#121625] border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl dark:hover:shadow-pink-950/20 hover:border-[#FF3D68]/40 transition-all duration-300 transform group-hover:-translate-y-1.5">
-
         <div className="relative w-full aspect-[2/3] overflow-hidden bg-slate-100 dark:bg-[#0F1322]">
           {posterUrl ? (
             <img
               src={posterUrl}
-              alt={movie.title}
+              alt={movie.title || "Movie poster"}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
               decoding="async"
+              onError={() => setImageError(true)}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center p-4 bg-slate-100 dark:bg-[#0F1322] text-[#FF3D68] text-xs sm:text-sm font-semibold text-center">
-              <span>{movie.title}</span>
+            <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-[#0F1322] text-[#FF3D68] text-xs sm:text-sm font-semibold text-center select-none">
+              <span className="line-clamp-3 px-2">{movie.title || "No Image Available"}</span>
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1020]/90 via-[#0B1020]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1020]/90 via-[#0B1020]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
           <button
             type="button"
-            className={`absolute top-2.5 left-2.5 z-20 flex items-center justify-center w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 ${
+            className={`absolute top-2.5 left-2.5 z-20 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
               bookmarked
                 ? "bg-[#FF3D68] border-[#FF3D68] text-white shadow-md shadow-[#FF3D68]/30"
                 : "border-white/20 bg-[#12182A]/80 text-white hover:bg-[#FF3D68] hover:border-[#FF3D68]"
@@ -74,7 +100,12 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
             onClick={handleBookmarkClick}
             aria-label={
               bookmarked
-                ? "Remove bookmark"
+                ? `Remove ${movie.title || "movie"} from bookmarks`
+                : `Bookmark ${movie.title || "movie"}`
+            }
+            title={
+              bookmarked
+                ? "Remove from bookmarks"
                 : "Bookmark movie"
             }
           >
@@ -91,7 +122,7 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
             </div>
           </div>
 
-          <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full border border-white/10 bg-[#12182A]/85 backdrop-blur-md text-white text-xs font-bold shadow-sm">
+          <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full border border-white/10 bg-[#12182A]/85 backdrop-blur-md text-white text-xs font-bold shadow-sm pointer-events-none">
             <Star
               size={12}
               fill="currentColor"
@@ -103,8 +134,11 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
 
         <div className="p-3 sm:p-4 flex flex-col gap-2 flex-1 justify-between bg-white dark:bg-[#121625]">
           <div className="flex flex-col gap-1.5">
-            <h3 className="font-bold text-sm sm:text-base line-clamp-1 sm:line-clamp-2 text-slate-900 dark:text-white group-hover:text-[#FF3D68] transition-colors duration-200 leading-snug">
-              {movie.title}
+            <h3 
+              className="font-bold text-sm sm:text-base line-clamp-1 sm:line-clamp-2 text-slate-900 dark:text-white group-hover:text-[#FF3D68] transition-colors duration-200 leading-snug"
+              title={movie.title}
+            >
+              {movie.title || "Untitled"}
             </h3>
 
             <span className="inline-flex items-center w-fit px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FF3D68]/10 border border-[#FF3D68]/20 text-[#FF3D68]">
