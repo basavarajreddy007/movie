@@ -21,7 +21,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f4f6fa] dark:bg-[#080B15]">
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-[#f4f6fa] dark:bg-[#080B15]">
         <Loader
           size="fullscreen"
           title="Authenticating..."
@@ -43,7 +43,7 @@ function PublicAuthRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f4f6fa] dark:bg-[#080B15]">
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-[#f4f6fa] dark:bg-[#080B15]">
         <Loader
           size="fullscreen"
           title="Authenticating..."
@@ -69,21 +69,18 @@ function MainLayout({
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
   searchCallbackRef: React.RefObject<((query: string) => void) | null>;
 }) {
-  const { isAuthenticated } = useAuth();
-
   const handleSearch = (query: string) => {
     searchCallbackRef.current?.(query);
   };
 
   return (
     <>
-      {isAuthenticated && (
-        <Navbar
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-          onSearch={handleSearch}
-        />
-      )}
+      {/* Navbar is always visible on all pages including Login and Register */}
+      <Navbar
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        onSearch={handleSearch}
+      />
 
       <Routes>
         <Route

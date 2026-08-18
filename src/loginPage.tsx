@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import {
   EyeIcon,
@@ -9,7 +9,6 @@ import {
   MailIcon,
   LockIcon,
   UserIcon,
-  ArrowLeft,
   Sparkles,
 } from "./components/icons";
 import "./styles/login.css";
@@ -93,7 +92,7 @@ export function LoginPage() {
   };
 
   const passwordStrength = useMemo(() => {
-    if (!form.password) return { score: 0, label: "", color: "", widthClass: "w-0" };
+    if (!form.password) return { score: 0, label: "", color: "", text: "", widthClass: "w-0" };
     let score = 0;
     if (form.password.length >= 6) score += 1;
     if (form.password.length >= 10) score += 1;
@@ -183,21 +182,20 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-72px)] w-full flex items-center justify-center p-4 sm:p-6 lg:p-10 overflow-hidden bg-[#070913] text-white">
-      <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[#FF3D68]/20 blur-[130px] pointer-events-none animate-ambient-glow" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-[#7928CA]/20 blur-[140px] pointer-events-none animate-ambient-glow" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#FF3D68]/10 blur-[160px] pointer-events-none cinema-poster-glow" />
+    <div className="login-page-wrapper">
+      <div className="login-ambient-orb-1" />
+      <div className="login-ambient-orb-2" />
 
       <div className="relative z-10 w-full max-w-[460px] mx-auto">
         <div
-          className={`cinema-glass-panel rounded-3xl border border-white/10 shadow-2xl p-6 sm:p-9 transition-all duration-300 ${
+          className={`login-card-panel transition-all duration-300 ${
             isShaking ? "animate-card-shake border-rose-500/40" : ""
           }`}
         >
           <div className="flex items-center justify-between mb-5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] font-bold text-slate-300">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-700 dark:text-slate-300">
               <LockIcon size={13} className="text-[#FF3D68]" />
-              <span>Member Access</span>
+              <span>Cinema Portal</span>
             </span>
             <span className="text-[11px] font-black tracking-widest text-[#FF3D68] uppercase">
               MOVIEMAX
@@ -205,24 +203,22 @@ export function LoginPage() {
           </div>
 
           <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
               {isRegister ? "Create Account" : "Sign In"}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
               {isRegister
-                ? "Join MOVIEMAX to manage your personal watchlist and bookmarks."
-                : "Enter your credentials to access your watchlist."}
+                ? "Join MOVIEMAX to explore movies and manage your personal bookmarks."
+                : "Sign in to access your movie watchlist and bookmarks."}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 p-1 rounded-2xl bg-white/[0.06] border border-white/10 mb-6">
+          <div className="login-tabs-container">
             <button
               type="button"
               onClick={() => handleTabChange("login")}
-              className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
-                !isRegister
-                  ? "bg-[#FF3D68] text-white shadow-lg shadow-[#FF3D68]/30"
-                  : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+              className={`login-tab-btn ${
+                !isRegister ? "login-tab-btn-active" : "login-tab-btn-inactive"
               }`}
             >
               <UserIcon size={16} />
@@ -231,10 +227,8 @@ export function LoginPage() {
             <button
               type="button"
               onClick={() => handleTabChange("register")}
-              className={`py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
-                isRegister
-                  ? "bg-[#FF3D68] text-white shadow-lg shadow-[#FF3D68]/30"
-                  : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+              className={`login-tab-btn ${
+                isRegister ? "login-tab-btn-active" : "login-tab-btn-inactive"
               }`}
             >
               <Sparkles size={16} />
@@ -243,14 +237,14 @@ export function LoginPage() {
           </div>
 
           {fieldErrors.general && (
-            <div className="p-3.5 sm:p-4 mb-5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-medium animate-slideDown">
+            <div className="p-3.5 sm:p-4 mb-5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs sm:text-sm font-medium animate-slideDown">
               <div className="flex items-start gap-2.5">
-                <AlertCircle size={18} className="text-rose-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle size={18} className="text-rose-500 dark:text-rose-400 flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-rose-200 leading-snug">{fieldErrors.general}</p>
+                  <p className="font-semibold text-rose-700 dark:text-rose-200 leading-snug">{fieldErrors.general}</p>
                   {fieldErrors.general.toLowerCase().includes("port 5000") && (
-                    <p className="mt-1 text-[11px] text-rose-300/80">
-                      Tip: Open terminal in <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-rose-200">backend</code> and run <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-rose-200">npm run dev</code>.
+                    <p className="mt-1 text-[11px] text-rose-600/80 dark:text-rose-300/80">
+                      Tip: Open terminal in <code className="px-1.5 py-0.5 rounded bg-black/10 dark:bg-black/40 font-mono text-rose-800 dark:text-rose-200">backend</code> and run <code className="px-1.5 py-0.5 rounded bg-black/10 dark:bg-black/40 font-mono text-rose-800 dark:text-rose-200">npm run dev</code>.
                     </p>
                   )}
                 </div>
@@ -263,7 +257,7 @@ export function LoginPage() {
               <div>
                 <label
                   htmlFor="field-name"
-                  className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5"
+                  className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5"
                 >
                   Full Name
                 </label>
@@ -278,17 +272,15 @@ export function LoginPage() {
                     placeholder="e.g. Alex Miller"
                     value={form.name}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 rounded-2xl text-sm bg-white/[0.06] border transition-all text-white placeholder-slate-500 focus:outline-none ${
-                      fieldErrors.name
-                        ? "border-rose-500 bg-rose-500/[0.08] focus:border-rose-500 focus:ring-4 focus:ring-rose-500/15"
-                        : "border-white/10 hover:border-white/20 focus:border-[#FF3D68] focus:ring-4 focus:ring-[#FF3D68]/15"
+                    className={`login-input-field ${
+                      fieldErrors.name ? "border-rose-500 focus:border-rose-500" : ""
                     }`}
                     autoComplete="name"
                   />
                 </div>
                 {fieldErrors.name && (
-                  <div className="mt-1.5 flex items-center gap-1.5 text-xs text-rose-400 font-medium animate-slideDown">
-                    <AlertCircle size={14} className="flex-shrink-0 text-rose-400" />
+                  <div className="mt-1.5 flex items-center gap-1.5 text-xs text-rose-500 font-medium animate-slideDown">
+                    <AlertCircle size={14} className="flex-shrink-0 text-rose-500" />
                     <span>{fieldErrors.name}</span>
                   </div>
                 )}
@@ -298,7 +290,7 @@ export function LoginPage() {
             <div>
               <label
                 htmlFor="field-email"
-                className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5"
+                className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5"
               >
                 Email Address
               </label>
@@ -313,17 +305,15 @@ export function LoginPage() {
                   placeholder="you@example.com"
                   value={form.email}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 rounded-2xl text-sm bg-white/[0.06] border transition-all text-white placeholder-slate-500 focus:outline-none ${
-                    fieldErrors.email
-                      ? "border-rose-500 bg-rose-500/[0.08] focus:border-rose-500 focus:ring-4 focus:ring-rose-500/15"
-                      : "border-white/10 hover:border-white/20 focus:border-[#FF3D68] focus:ring-4 focus:ring-[#FF3D68]/15"
+                  className={`login-input-field ${
+                    fieldErrors.email ? "border-rose-500 focus:border-rose-500" : ""
                   }`}
                   autoComplete="email"
                 />
               </div>
               {fieldErrors.email && (
-                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-rose-400 font-medium animate-slideDown">
-                  <AlertCircle size={14} className="flex-shrink-0 text-rose-400" />
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-rose-500 font-medium animate-slideDown">
+                  <AlertCircle size={14} className="flex-shrink-0 text-rose-500" />
                   <span>{fieldErrors.email}</span>
                 </div>
               )}
@@ -333,7 +323,7 @@ export function LoginPage() {
               <div className="flex items-center justify-between mb-1.5">
                 <label
                   htmlFor="field-password"
-                  className="block text-xs font-bold text-slate-300 uppercase tracking-wider"
+                  className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Password {isRegister && <span className="text-slate-400 font-normal lowercase">(min. 6)</span>}
                 </label>
@@ -349,17 +339,15 @@ export function LoginPage() {
                   placeholder="••••••••••••"
                   value={form.password}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-11 py-3 rounded-2xl text-sm bg-white/[0.06] border transition-all text-white placeholder-slate-500 focus:outline-none ${
-                    fieldErrors.password
-                      ? "border-rose-500 bg-rose-500/[0.08] focus:border-rose-500 focus:ring-4 focus:ring-rose-500/15"
-                      : "border-white/10 hover:border-white/20 focus:border-[#FF3D68] focus:ring-4 focus:ring-[#FF3D68]/15"
+                  className={`login-input-field pr-11 ${
+                    fieldErrors.password ? "border-rose-500 focus:border-rose-500" : ""
                   }`}
                   autoComplete={isRegister ? "new-password" : "current-password"}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
@@ -374,7 +362,7 @@ export function LoginPage() {
                       {passwordStrength.label}
                     </span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color} ${passwordStrength.widthClass}`}
                     />
@@ -383,8 +371,8 @@ export function LoginPage() {
               )}
 
               {fieldErrors.password && (
-                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-rose-400 font-medium animate-slideDown">
-                  <AlertCircle size={14} className="flex-shrink-0 text-rose-400" />
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-rose-500 font-medium animate-slideDown">
+                  <AlertCircle size={14} className="flex-shrink-0 text-rose-500" />
                   <span>{fieldErrors.password}</span>
                 </div>
               )}
@@ -406,7 +394,7 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-white/10 text-center text-xs text-slate-400">
+          <div className="mt-6 pt-5 border-t border-slate-200 dark:border-white/10 text-center text-xs text-slate-500 dark:text-slate-400">
             {isRegister ? (
               <span>
                 Already have an account?{" "}
@@ -420,7 +408,7 @@ export function LoginPage() {
               </span>
             ) : (
               <span>
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <button
                   type="button"
                   onClick={() => handleTabChange("register")}
