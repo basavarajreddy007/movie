@@ -1,18 +1,44 @@
-.absolute {
-  position: absolute;
+.uiverse-spinner-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
 }
 
-.inline-block {
-  display: inline-block;
+.spinner-xs {
+  width: 18px;
+  height: 18px;
+}
+
+.spinner-sm {
+  width: 28px;
+  height: 28px;
+}
+
+.spinner-md {
+  width: 54px;
+  height: 54px;
+}
+
+.spinner-lg {
+  width: 68px;
+  height: 68px;
+}
+
+.spinner-fullscreen {
+  width: 68px;
+  height: 68px;
+}
+
+.spinner-default {
+  width: 48px;
+  height: 48px;
 }
 
 .loader {
   display: flex;
   margin: 0.25em 0;
-}
-
-.w-2 {
-  width: 0.5em;
 }
 
 .dash {
@@ -31,11 +57,9 @@
   0% {
     stroke-dasharray: 0 1 359 0;
   }
-
   50% {
     stroke-dasharray: 0 359 1 0;
   }
-
   100% {
     stroke-dasharray: 359 1 0 0;
   }
@@ -45,11 +69,9 @@
   0% {
     stroke-dasharray: 270 90;
   }
-
   50% {
     stroke-dasharray: 0 360;
   }
-
   100% {
     stroke-dasharray: 270 90;
   }
@@ -59,7 +81,6 @@
   0% {
     stroke-dashoffset: 365;
   }
-
   100% {
     stroke-dashoffset: 5;
   }
@@ -70,27 +91,19 @@
     rotate: 0deg;
     transform: rotate(0deg);
   }
-
-  12.5%,
-  25% {
+  12.5%, 25% {
     rotate: 270deg;
     transform: rotate(270deg);
   }
-
-  37.5%,
-  50% {
+  37.5%, 50% {
     rotate: 540deg;
     transform: rotate(540deg);
   }
-
-  62.5%,
-  75% {
+  62.5%, 75% {
     rotate: 810deg;
     transform: rotate(810deg);
   }
-
-  87.5%,
-  90% {
+  87.5%, 90% {
     rotate: 1080deg;
     transform: rotate(1080deg);
   }
@@ -103,6 +116,27 @@
   background: radial-gradient(circle, rgba(255, 61, 104, 0.35) 0%, rgba(255, 160, 107, 0.15) 70%, transparent 100%);
   animation: pulseGlow 3s ease-in-out infinite;
   pointer-events: none;
+}
+
+.glow-xs {
+  width: 40px;
+  height: 40px;
+}
+
+.glow-sm {
+  width: 62px;
+  height: 62px;
+}
+
+.glow-md {
+  width: 120px;
+  height: 120px;
+}
+
+.glow-lg,
+.glow-fullscreen {
+  width: 150px;
+  height: 150px;
 }
 
 @keyframes pulseGlow {

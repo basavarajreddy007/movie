@@ -7,6 +7,23 @@ export interface SpinnerProps {
   strokeWidth?: number;
 }
 
+const getSpinnerSizeClass = (size?: number | string): string => {
+  if (typeof size === "string") {
+    if (size === "xs") return "spinner-xs";
+    if (size === "sm") return "spinner-sm";
+    if (size === "md") return "spinner-md";
+    if (size === "lg") return "spinner-lg";
+    if (size === "fullscreen") return "spinner-fullscreen";
+  }
+  if (typeof size === "number") {
+    if (size <= 20) return "spinner-xs";
+    if (size <= 32) return "spinner-sm";
+    if (size <= 56) return "spinner-md";
+    return "spinner-lg";
+  }
+  return "spinner-default";
+};
+
 export function UiverseSpinner({
   size = 48,
   className = "",
@@ -16,18 +33,15 @@ export function UiverseSpinner({
   const grad1Id = `uiverse_g1_${rawId}`;
   const grad2Id = `uiverse_g2_${rawId}`;
 
-  const numSize = typeof size === "number" ? size : parseInt(size, 10) || 48;
+  const sizeClass = getSpinnerSizeClass(size);
 
   return (
     <div
-      className={`inline-flex items-center justify-center relative flex-shrink-0 ${className}`}
-      style={{ width: numSize, height: numSize }}
+      className={`uiverse-spinner-container ${sizeClass} ${className}`.trim()}
       aria-hidden="true"
     >
       <svg
         viewBox="0 0 120 120"
-        width={numSize}
-        height={numSize}
         className="w-full h-full overflow-visible"
       >
         <defs>
@@ -125,6 +139,17 @@ export function Loader({
       ? dynamicMessages[currentMessageIndex]
       : undefined);
 
+  const glowSizeClass =
+    size === "xs"
+      ? "glow-xs"
+      : size === "sm"
+      ? "glow-sm"
+      : size === "md"
+      ? "glow-md"
+      : size === "lg"
+      ? "glow-lg"
+      : "glow-fullscreen";
+
   const spinnerSize =
     size === "xs"
       ? 18
@@ -190,13 +215,7 @@ export function Loader({
     >
       <div className="relative flex items-center justify-center mb-6">
         {showGlow && (
-          <div
-            className="loader-glow"
-            style={{
-              width: spinnerSize * 2.2,
-              height: spinnerSize * 2.2,
-            }}
-          />
+          <div className={`loader-glow ${glowSizeClass}`} />
         )}
         <UiverseSpinner size={spinnerSize} strokeWidth={strokeWidth} />
       </div>

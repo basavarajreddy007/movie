@@ -63,3 +63,24 @@
 .dark .cinema-poster-glow {
   background: radial-gradient(circle at 50% 20%, rgba(255, 61, 104, 0.25), rgba(120, 30, 80, 0.08) 50%, transparent 80%);
 }
+
+/* Password strength meter bar classes - eliminates inline css */
+.strength-bar-15 {
+  width: 15%;
+}
+
+.strength-bar-25 {
+  width: 25%;
+}
+
+.strength-bar-50 {
+  width: 50%;
+}
+
+.strength-bar-75 {
+  width: 75%;
+}
+
+.strength-bar-100 {
+  width: 100%;
+}

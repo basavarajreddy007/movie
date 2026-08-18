@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   Sparkles,
 } from "./components/icons";
+import "./styles/login.css";
 
 interface FieldErrors {
   name?: string;
@@ -92,7 +93,7 @@ export function LoginPage() {
   };
 
   const passwordStrength = useMemo(() => {
-    if (!form.password) return { score: 0, label: "", color: "" };
+    if (!form.password) return { score: 0, label: "", color: "", widthClass: "w-0" };
     let score = 0;
     if (form.password.length >= 6) score += 1;
     if (form.password.length >= 10) score += 1;
@@ -101,15 +102,15 @@ export function LoginPage() {
 
     switch (score) {
       case 1:
-        return { score: 25, label: "Weak", color: "bg-rose-500", text: "text-rose-500" };
+        return { score: 25, label: "Weak", color: "bg-rose-500", text: "text-rose-500", widthClass: "strength-bar-25" };
       case 2:
-        return { score: 50, label: "Fair", color: "bg-amber-500", text: "text-amber-500" };
+        return { score: 50, label: "Fair", color: "bg-amber-500", text: "text-amber-500", widthClass: "strength-bar-50" };
       case 3:
-        return { score: 75, label: "Good", color: "bg-blue-500", text: "text-blue-500" };
+        return { score: 75, label: "Good", color: "bg-blue-500", text: "text-blue-500", widthClass: "strength-bar-75" };
       case 4:
-        return { score: 100, label: "Strong", color: "bg-emerald-500", text: "text-emerald-500" };
+        return { score: 100, label: "Strong", color: "bg-emerald-500", text: "text-emerald-500", widthClass: "strength-bar-100" };
       default:
-        return { score: 15, label: "Too Short", color: "bg-rose-500", text: "text-rose-500" };
+        return { score: 15, label: "Too Short", color: "bg-rose-500", text: "text-rose-500", widthClass: "strength-bar-15" };
     }
   }, [form.password]);
 
@@ -377,8 +378,7 @@ export function LoginPage() {
                   </div>
                   <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color}`}
-                      style={{ width: `${passwordStrength.score}%` }}
+                      className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color} ${passwordStrength.widthClass}`}
                     />
                   </div>
                 </div>
