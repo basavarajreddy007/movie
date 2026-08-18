@@ -166,7 +166,8 @@ export function LoginPage() {
           });
 
       if (res.success) {
-        navigate("/");
+        const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || "/";
+        navigate(from, { replace: true });
       } else {
         setFieldErrors({ general: res.message || "Authentication failed." });
         triggerShake();
@@ -194,13 +195,10 @@ export function LoginPage() {
           }`}
         >
           <div className="flex items-center justify-between mb-5">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors group cursor-pointer"
-            >
-              <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
-              <span>Back to Home</span>
-            </Link>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] font-bold text-slate-300">
+              <LockIcon size={13} className="text-[#FF3D68]" />
+              <span>Member Access</span>
+            </span>
             <span className="text-[11px] font-black tracking-widest text-[#FF3D68] uppercase">
               MOVIEMAX
             </span>

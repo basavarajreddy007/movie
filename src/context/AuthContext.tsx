@@ -48,7 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Bookmarks are strictly loaded and saved from MongoDB Atlas, never in localStorage
   const [bookmarks, setBookmarks] = useState<Movie[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    try {
+      return !!localStorage.getItem("token");
+    } catch {
+      return false;
+    }
+  });
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"login" | "register">("login");
@@ -71,8 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      setIsLoading(true);
-
       try {
         const result = await fetchUserBookmarks(activeToken);
 
@@ -84,8 +88,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch {
         setBookmarks([]);
-      } finally {
-        setIsLoading(false);
       }
     },
     [token]
@@ -185,6 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthModalOpen(false);
     setAuthError(null);
     setBookmarks([]);
+    setIsLoading(false);
 
     try {
       localStorage.removeItem("user");
@@ -215,6 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!token) {
       initializedTokenRef.current = null;
       setBookmarks([]);
+      setIsLoading(false);
       return;
     }
 
@@ -226,6 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const currentToken = token;
 
     const initializeAuth = async () => {
+      setIsLoading(true);
       try {
         const meResult = await getCurrentUser(currentToken);
 
@@ -252,6 +257,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
         logout();
+      } finally {
+        setIsLoading(false);
       }
     };
 
