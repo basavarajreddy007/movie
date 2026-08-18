@@ -1,4 +1,4 @@
-import type { Movie } from "../types/movies";
+import type { Movie, MovieCredits } from "../types/movies";
 
 const TOKEN = import.meta.env.VITE_TMDB_TOKEN || "";
 
@@ -120,7 +120,7 @@ export const getMovies = async (
 };
 
 export const getMovieById = async (
-  id: string
+  id: string | number
 ): Promise<Movie> => {
   const url =
     `${TMDB_BASE_URL}/movie/${encodeURIComponent(id)}`;
@@ -153,4 +153,37 @@ const fetchMoviesDetails = async (
   }
 
   return response.json();
+};
+
+export const getMovieCredits = async (
+  id: string | number
+): Promise<MovieCredits> => {
+  const url = `${TMDB_BASE_URL}/movie/${encodeURIComponent(id)}/credits`;
+
+  try {
+    const response = await fetchWithTimeout(url, {
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load credits: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return {
+      id: Number(data.id || id),
+      cast: Array.isArray(data.cast) ? data.cast : [],
+      crew: Array.isArray(data.crew) ? data.crew : [],
+    };
+  } catch (error) {
+    console.error("Movie credits fetch error:", error);
+    return {
+      id: Number(id),
+      cast: [],
+      crew: [],
+    };
+  }
 };

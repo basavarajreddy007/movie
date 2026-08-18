@@ -8,6 +8,7 @@
 @import "./styles/searchBar.css";
 @import "./styles/bookmarks.css";
 @import "./styles/home.css";
+@import "./styles/castCarousel.css";
 
 @variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
 
