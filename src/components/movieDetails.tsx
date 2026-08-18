@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Play, Star, Calendar, AlertCircle, Bookmark } from "./icons";
 import type { Movie } from "../types/movies";
 import { getMovieById } from "../service/movieapi";
-import { isBookmarked, toggleBookmark } from "../utils/bookmarks";
+import { useAuth } from "../context/AuthContext";
 import { Loader } from "./Loader";
 
 function MovieDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bookmarked, setBookmarked] = useState(false);
+
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -24,7 +27,6 @@ function MovieDetails() {
       try {
         const data = await getMovieById(id);
         setMovie(data);
-        setBookmarked(isBookmarked(data.id));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch movie details.");
       } finally {
@@ -35,23 +37,17 @@ function MovieDetails() {
     fetchMovie();
   }, [id]);
 
-  useEffect(() => {
-    const updateBookmarkState = () => {
-      if (movie) {
-        setBookmarked(isBookmarked(movie.id));
-      }
-    };
+  const bookmarked = movie ? isBookmarked(movie.id) : false;
 
-    window.addEventListener("bookmarksUpdated", updateBookmarkState);
-    return () => {
-      window.removeEventListener("bookmarksUpdated", updateBookmarkState);
-    };
-  }, [movie]);
-
-  const handleBookmarkToggle = () => {
+  const handleBookmarkToggle = async () => {
     if (!movie) return;
-    const newState = toggleBookmark(movie);
-    setBookmarked(newState);
+
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    await toggleBookmark(movie);
   };
 
   if (loading) {
@@ -83,9 +79,10 @@ function MovieDetails() {
     );
   }
 
-  const posterUrl = movie.poster_path
-    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : "https://via.placeholder.com/500x750?text=No+Poster";
+  const posterUrl =
+    movie.poster_path && !imageError
+      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+      : null;
 
   const rating = movie.vote_average
     ? movie.vote_average.toFixed(1)
@@ -95,14 +92,21 @@ function MovieDetails() {
     <main className="w-full min-h-[calc(100vh-72px)] px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-[#f4f6fa] dark:bg-[#080B15] transition-colors duration-200">
       <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-8 md:gap-12 items-start">
         <div className="relative w-full max-w-[280px] md:max-w-none aspect-[2/3] mx-auto overflow-hidden rounded-2xl bg-slate-200 dark:bg-[#0F1322] border border-slate-200 dark:border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 group">
-          <img
-            className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
-            src={posterUrl}
-            alt={movie.title || "Movie poster"}
-          />
+          {posterUrl ? (
+            <img
+              className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
+              src={posterUrl}
+              alt={movie.title || "Movie poster"}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-slate-100 dark:bg-[#0F1322] text-[#FF3D68] font-bold text-center">
+              <span className="line-clamp-4">{movie.title || "No Image Available"}</span>
+            </div>
+          )}
           <button
             type="button"
-            className={`absolute top-3.5 right-3.5 z-10 flex items-center justify-center w-10 h-10 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 ${
+            className={`absolute top-3.5 right-3.5 z-10 flex items-center justify-center w-10 h-10 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
               bookmarked
                 ? "bg-[#FF3D68] border-[#FF3D68] text-white shadow-lg shadow-[#FF3D68]/40"
                 : "border-white/20 bg-black/60 text-white hover:bg-[#FF3D68] hover:border-[#FF3D68]"

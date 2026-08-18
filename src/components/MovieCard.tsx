@@ -1,8 +1,8 @@
-import { memo, useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { memo, useCallback, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Bookmark, Play, Star } from "./icons";
 import type { Movie } from "../types/movies";
-import { isBookmarked, toggleBookmark } from "../utils/bookmarks";
+import { useAuth } from "../context/AuthContext";
 
 type Props = {
   movie: Movie;
@@ -10,35 +10,25 @@ type Props = {
 };
 
 function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
-  const [bookmarked, setBookmarked] = useState(() =>
-    isBookmarked(movie.id)
-  );
+  const navigate = useNavigate();
+  const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
+  const bookmarked = isBookmarked(movie.id);
   const [imageError, setImageError] = useState(false);
 
-  useEffect(() => {
-    setBookmarked(isBookmarked(movie.id));
-    setImageError(false);
-
-    const handleBookmarkUpdate = () => {
-      setBookmarked(isBookmarked(movie.id));
-    };
-
-    window.addEventListener("bookmarksUpdated", handleBookmarkUpdate);
-    return () => {
-      window.removeEventListener("bookmarksUpdated", handleBookmarkUpdate);
-    };
-  }, [movie.id]);
-
   const handleBookmarkClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
 
-      const newState = toggleBookmark(movie);
-      setBookmarked(newState);
+      if (!isAuthenticated) {
+        navigate("/login");
+        return;
+      }
+
+      await toggleBookmark(movie);
       onBookmarkToggle?.();
     },
-    [movie, onBookmarkToggle]
+    [isAuthenticated, navigate, movie, toggleBookmark, onBookmarkToggle]
   );
 
   const rating =

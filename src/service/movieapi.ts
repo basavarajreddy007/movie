@@ -1,6 +1,6 @@
 import type { Movie } from "../types/movies";
 
-const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
+const TOKEN = import.meta.env.VITE_TMDB_TOKEN || "";
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const REQUEST_TIMEOUT = 8000;

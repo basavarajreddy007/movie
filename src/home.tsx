@@ -50,6 +50,14 @@ function Home({ searchCallbackRef }: HomeProps = {}) {
   }, []);
 
   useEffect(() => {
+    if (searchCallbackRef) {
+      searchCallbackRef.current = (searchQuery: string) => {
+        fetchMovies(searchQuery || undefined);
+      };
+    }
+  }, [searchCallbackRef, fetchMovies]);
+
+  useEffect(() => {
     fetchMovies(query || undefined);
 
     if (query) {

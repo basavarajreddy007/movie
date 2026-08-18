@@ -5,6 +5,8 @@ import Home from "./home";
 import MovieDetails from "./components/movieDetails";
 import Bookmarks from "./bookmarks";
 import { Navbar } from "./components/navbar";
+import { AuthProvider } from "./context/AuthContext";
+import LoginPage from "./loginPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -28,22 +30,26 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Navbar 
-        darkMode={darkMode} 
-        setDarkMode={setDarkMode}
-        onSearch={handleSearch}
-      />
-
-      <Routes>
-        <Route 
-          path="/" 
-          element={<Home searchCallbackRef={searchCallbackRef} />} 
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar 
+          darkMode={darkMode} 
+          setDarkMode={setDarkMode}
+          onSearch={handleSearch}
         />
-        <Route path="/movie/:id" element={<MovieDetails />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-      </Routes>
-    </BrowserRouter>
+
+        <Routes>
+          <Route 
+            path="/" 
+            element={<Home searchCallbackRef={searchCallbackRef} />} 
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<LoginPage />} />
+          <Route path="/movie/:id" element={<MovieDetails />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
