@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Bookmark, Play, Star } from "./icons";
 import type { Movie } from "../types/movies";
@@ -9,51 +9,31 @@ type Props = {
   onBookmarkToggle?: () => void;
 };
 
-function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
+export function MovieCard({ movie, onBookmarkToggle }: Props) {
   const navigate = useNavigate();
   const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
-  const bookmarked = isBookmarked(movie.id);
   const [imageError, setImageError] = useState(false);
 
-  const handleBookmarkClick = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!isAuthenticated) {
-        navigate("/login");
-        return;
-      }
-
-      await toggleBookmark(movie);
-      onBookmarkToggle?.();
-    },
-    [isAuthenticated, navigate, movie, toggleBookmark, onBookmarkToggle]
-  );
-
-  const rating =
-    typeof movie.vote_average === "number" &&
-    !Number.isNaN(movie.vote_average) &&
-    movie.vote_average > 0
-      ? movie.vote_average.toFixed(1)
-      : "N/A";
-
-  const getReleaseYear = (dateStr?: string): string => {
-    if (!dateStr) return "N/A";
-    const parsedYear = new Date(dateStr).getFullYear();
-    if (!Number.isNaN(parsedYear)) {
-      return String(parsedYear);
-    }
-    const match = dateStr.match(/^\d{4}/);
-    return match ? match[0] : "N/A";
-  };
-
-  const releaseYear = getReleaseYear(movie.release_date);
-
+  const bookmarked = isBookmarked(movie.id);
+  const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
+  const releaseYear = movie.release_date ? movie.release_date.slice(0, 4) : "N/A";
   const posterUrl =
     movie.poster_path && !imageError
       ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
       : null;
+
+  const handleBookmarkClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    await toggleBookmark(movie);
+    onBookmarkToggle?.();
+  };
 
   return (
     <Link
@@ -69,7 +49,6 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
               alt={movie.title || "Movie poster"}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
-              decoding="async"
               onError={() => setImageError(true)}
             />
           ) : (
@@ -80,6 +59,7 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
 
           <div className="absolute inset-0 bg-gradient-to-t from-[#0B1020]/90 via-[#0B1020]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
+          {/* Bookmark Button */}
           <button
             type="button"
             className={`absolute top-2.5 left-2.5 z-20 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
@@ -106,12 +86,14 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
             />
           </button>
 
+          {/* Play Icon */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 scale-90 group-hover:scale-100 pointer-events-none">
             <div className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#FF3D68] bg-[#12182A]/90 text-[#FF3D68] shadow-lg shadow-[#FF3D68]/30">
               <Play size={20} fill="currentColor" />
             </div>
           </div>
 
+          {/* Rating */}
           <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full border border-white/10 bg-[#12182A]/85 backdrop-blur-md text-white text-xs font-bold shadow-sm pointer-events-none">
             <Star
               size={12}
@@ -122,6 +104,7 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
           </div>
         </div>
 
+        {/* Info */}
         <div className="p-3 sm:p-4 flex flex-col gap-2 flex-1 justify-between bg-white dark:bg-[#121625]">
           <div className="flex flex-col gap-1.5">
             <h3 
@@ -147,6 +130,4 @@ function MovieCardComponent({ movie, onBookmarkToggle }: Props) {
   );
 }
 
-export const MovieCard = memo(MovieCardComponent);
-export const MemoizedMovieCard = MovieCard;
 export default MovieCard;

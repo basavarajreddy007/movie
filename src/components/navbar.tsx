@@ -9,14 +9,9 @@ import "../styles/navbar.css";
 type Props = {
   darkMode: boolean;
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
-  onSearch?: (query: string) => void;
 };
 
-export function Navbar({
-  darkMode,
-  setDarkMode,
-  onSearch,
-}: Props) {
+export function Navbar({ darkMode, setDarkMode }: Props) {
   const [searchValue, setSearchValue] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -66,7 +61,6 @@ export function Navbar({
 
     navigate(`/?q=${encodeURIComponent(query)}`);
     setIsMobileMenuOpen(false);
-    onSearch?.(query);
   };
 
   const handleLogoClick = () => {

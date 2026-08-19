@@ -26,7 +26,6 @@ export function SearchBar({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  const cacheRef = useRef<Map<string, Movie[]>>(new Map());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,32 +39,14 @@ export function SearchBar({
       return;
     }
 
-    const cached = cacheRef.current.get(trimmed.toLowerCase());
-    if (cached) {
-      setSuggestions(cached);
-      setLoadingSuggestions(false);
-      setIsOpen(true);
-      setSelectedIndex(-1);
-      return;
-    }
-
     let isCurrent = true;
     setLoadingSuggestions(true);
 
-    const debounceTimer = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const results = await getMovies(trimmed);
         if (isCurrent) {
-          const seen = new Set<number>();
-          const filtered = results.filter((m) => {
-            if (!m || !m.id || !m.title || seen.has(m.id)) return false;
-            seen.add(m.id);
-            return true;
-          });
-
-          const topResults = filtered.slice(0, 6);
-          cacheRef.current.set(trimmed.toLowerCase(), topResults);
-          setSuggestions(topResults);
+          setSuggestions(results.slice(0, 6));
           setIsOpen(true);
           setSelectedIndex(-1);
         }
@@ -82,7 +63,7 @@ export function SearchBar({
 
     return () => {
       isCurrent = false;
-      clearTimeout(debounceTimer);
+      clearTimeout(timer);
     };
   }, [value]);
 
@@ -164,26 +145,20 @@ export function SearchBar({
   }, [selectedIndex]);
 
   const renderHighlightedTitle = (title: string, query: string) => {
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery) return title;
+    const q = query.trim().toLowerCase();
+    if (!q) return title;
+    const idx = title.toLowerCase().indexOf(q);
+    if (idx === -1) return title;
 
-    try {
-      const escaped = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const regex = new RegExp(`(${escaped})`, "gi");
-      const parts = title.split(regex);
-
-      return parts.map((part, i) =>
-        part.toLowerCase() === trimmedQuery.toLowerCase() ? (
-          <span key={i} className="text-[#FF3D68] font-bold">
-            {part}
-          </span>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      );
-    } catch {
-      return title;
-    }
+    return (
+      <>
+        {title.slice(0, idx)}
+        <span className="text-[#FF3D68] font-bold">
+          {title.slice(idx, idx + q.length)}
+        </span>
+        {title.slice(idx + q.length)}
+      </>
+    );
   };
 
   return (

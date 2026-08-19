@@ -1,16 +1,14 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || "default_secret", {
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET || "default_secret", {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
-};
 
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -18,7 +16,8 @@ export const register = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -28,16 +27,14 @@ export const register = async (req, res) => {
 
     const user = await User.create({
       name: name.trim(),
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       password,
     });
-
-    const token = generateToken(user._id);
 
     return res.status(201).json({
       success: true,
       message: "Account created successfully.",
-      token,
+      token: generateToken(user._id),
       user,
     });
   } catch (error) {
@@ -51,7 +48,6 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -67,12 +63,10 @@ export const login = async (req, res) => {
       });
     }
 
-    const token = generateToken(user._id);
-
     return res.status(200).json({
       success: true,
       message: "Logged in successfully.",
-      token,
+      token: generateToken(user._id),
       user,
     });
   } catch (error) {

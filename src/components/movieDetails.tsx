@@ -1,51 +1,57 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Play, Star, Calendar, AlertCircle, Bookmark } from "./icons";
-import type { Movie, MovieCredits } from "../types/movies";
-import { getMovieById, getMovieCredits } from "../service/movieapi";
+import type { Movie } from "../types/movies";
+import { getMovieById } from "../service/movieapi";
 import { useAuth } from "../context/AuthContext";
 import { Loader } from "./Loader";
-import { CastCarousel } from "./CastCarousel";
 import "../styles/movieDetails.css";
 
-function MovieDetails() {
+export function MovieDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
 
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [credits, setCredits] = useState<MovieCredits | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
-    const fetchMovieAndCredits = async () => {
-      if (!id) return;
+    if (!id) return;
 
+    let cancelled = false;
+
+    const loadMovie = async () => {
       setLoading(true);
-      setError(null);
 
       try {
-        const [movieData, creditsData] = await Promise.all([
-          getMovieById(id),
-          getMovieCredits(id),
-        ]);
+        const movieData = await getMovieById(id);
 
-        setMovie(movieData);
-        setCredits(creditsData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch movie details.");
+        if (!cancelled) {
+          setMovie(movieData);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : "Failed to load movie"
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchMovieAndCredits();
-  }, [id]);
+    loadMovie();
 
-  const bookmarked = movie ? isBookmarked(movie.id) : false;
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const handleBookmarkToggle = async () => {
     if (!movie) return;
@@ -61,17 +67,7 @@ function MovieDetails() {
   if (loading) {
     return (
       <main className="w-full min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-16 bg-[#f4f6fa] dark:bg-[#080B15] transition-colors duration-200">
-        <Loader
-          title="Loading Movie Details"
-          badge="CINEMA PREVIEW"
-          dynamicMessages={[
-            "Fetching movie lore & ratings...",
-            "Retrieving high-res poster artwork...",
-            "Loading full cast and crew credits...",
-            "Almost ready for showtime...",
-          ]}
-          size="lg"
-        />
+        <Loader title="Loading Movie Details..." size="lg" />
       </main>
     );
   }
@@ -87,25 +83,24 @@ function MovieDetails() {
     );
   }
 
+  const bookmarked = isBookmarked(movie.id);
+  const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
   const posterUrl =
     movie.poster_path && !imageError
       ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
       : null;
 
-  const rating = movie.vote_average
-    ? movie.vote_average.toFixed(1)
-    : "N/A";
-
   return (
     <main className="w-full min-h-[calc(100vh-72px)] px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-[#f4f6fa] dark:bg-[#080B15] transition-colors duration-200">
       <div className="w-full max-w-5xl mx-auto">
         <div className="movie-details-layout mb-6">
+          {/* Poster and Bookmark Button */}
           <div className="relative w-full max-w-[280px] md:max-w-none aspect-[2/3] mx-auto overflow-hidden rounded-2xl bg-slate-200 dark:bg-[#0F1322] border border-slate-200 dark:border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 group">
             {posterUrl ? (
               <img
-                className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
                 src={posterUrl}
                 alt={movie.title || "Movie poster"}
+                className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
                 onError={() => setImageError(true)}
               />
             ) : (
@@ -113,6 +108,7 @@ function MovieDetails() {
                 <span className="line-clamp-4">{movie.title || "No Image Available"}</span>
               </div>
             )}
+
             <button
               type="button"
               className={`absolute top-3.5 right-3.5 z-10 flex items-center justify-center w-10 h-10 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
@@ -132,6 +128,7 @@ function MovieDetails() {
             </button>
           </div>
 
+          {/* Movie Details Info */}
           <div className="w-full flex flex-col items-start">
             <span className="movie-badge-pill mb-3">
               MOVIE DETAILS
@@ -167,8 +164,8 @@ function MovieDetails() {
 
             <div className="w-full flex items-center gap-3">
               <button
-                className="inline-flex items-center justify-center gap-2 h-11 sm:h-12 px-6 rounded-xl font-bold text-sm sm:text-base text-white bg-gradient-to-r from-[#FF3D68] to-[#FF5E80] shadow-lg shadow-[#FF3D68]/30 hover:brightness-110 hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
                 type="button"
+                className="inline-flex items-center justify-center gap-2 h-11 sm:h-12 px-6 rounded-xl font-bold text-sm sm:text-base text-white bg-gradient-to-r from-[#FF3D68] to-[#FF5E80] shadow-lg shadow-[#FF3D68]/30 hover:brightness-110 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 cursor-pointer"
                 aria-label="Watch Now"
                 title="Watch Now"
               >
@@ -178,9 +175,6 @@ function MovieDetails() {
             </div>
           </div>
         </div>
-
-        {/* Cast & Crew Carousel */}
-        <CastCarousel credits={credits} />
       </div>
     </main>
   );

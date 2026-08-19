@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -13,23 +13,10 @@ import Bookmarks from "./bookmarks";
 import { Navbar } from "./components/navbar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./loginPage";
-import { Loader } from "./components/Loader";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-[#f4f6fa] dark:bg-[#080B15]">
-        <Loader
-          size="fullscreen"
-          title="Authenticating..."
-          subtitle="Verifying your MOVIEMAX account"
-        />
-      </div>
-    );
-  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -39,94 +26,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function PublicAuthRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-[#f4f6fa] dark:bg-[#080B15]">
-        <Loader
-          size="fullscreen"
-          title="Authenticating..."
-          subtitle="Verifying your MOVIEMAX account"
-        />
-      </div>
-    );
-  }
+  const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
-}
-
-function MainLayout({
-  darkMode,
-  setDarkMode,
-  searchCallbackRef,
-}: {
-  darkMode: boolean;
-  setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
-  searchCallbackRef: React.RefObject<((query: string) => void) | null>;
-}) {
-  const handleSearch = (query: string) => {
-    searchCallbackRef.current?.(query);
-  };
-
-  return (
-    <>
-      {/* Navbar is always visible on all pages including Login and Register */}
-      <Navbar
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
-        onSearch={handleSearch}
-      />
-
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            <PublicAuthRoute>
-              <LoginPage />
-            </PublicAuthRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicAuthRoute>
-              <LoginPage />
-            </PublicAuthRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home searchCallbackRef={searchCallbackRef} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/movie/:id"
-          element={
-            <ProtectedRoute>
-              <MovieDetails />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/bookmarks"
-          element={
-            <ProtectedRoute>
-              <Bookmarks />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </>
-  );
 }
 
 function App() {
@@ -137,16 +43,11 @@ function App() {
       return true;
     }
   });
-  const searchCallbackRef = useRef<((query: string) => void) | null>(null);
 
   useEffect(() => {
     const theme = darkMode ? "dark" : "light";
     document.documentElement.setAttribute("data-theme", theme);
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", darkMode);
     try {
       localStorage.setItem("theme", theme);
     } catch {
@@ -157,11 +58,50 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <MainLayout
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-          searchCallbackRef={searchCallbackRef}
-        />
+        <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+        <Routes>
+          <Route
+            path="/login"
+            element={
+              <PublicAuthRoute>
+                <LoginPage />
+              </PublicAuthRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicAuthRoute>
+                <LoginPage />
+              </PublicAuthRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/movie/:id"
+            element={
+              <ProtectedRoute>
+                <MovieDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookmarks"
+            element={
+              <ProtectedRoute>
+                <Bookmarks />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   );

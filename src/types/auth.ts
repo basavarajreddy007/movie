@@ -40,9 +40,5 @@ export interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; message?: string }>;
   register: (credentials: RegisterCredentials) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
-  isAuthModalOpen: boolean;
-  authModalTab: "login" | "register";
-  openAuthModal: (tab?: "login" | "register") => void;
-  closeAuthModal: () => void;
   clearAuthError: () => void;
 }
