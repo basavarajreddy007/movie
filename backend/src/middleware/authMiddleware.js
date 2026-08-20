@@ -2,44 +2,37 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 export const protect = async (req, res, next) => {
-  let token;
-
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer ")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  }
+  const authHeader = req.headers.authorization;
+  const token =
+    authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : null;
 
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: "Access denied. Authentication token is missing.",
+      message: "Token is missing. Please log in.",
     });
   }
 
   try {
     const secret = process.env.JWT_SECRET || "default_secret";
     const decoded = jwt.verify(token, secret);
-
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User session not found. Please log in again.",
+        message: "User not found.",
       });
     }
 
     req.user = user;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({
       success: false,
-      message:
-        error.name === "TokenExpiredError"
-          ? "Session has expired. Please log in again."
-          : "Invalid authentication token.",
+      message: "Invalid or expired token.",
     });
   }
 };
