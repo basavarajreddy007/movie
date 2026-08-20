@@ -1,0 +1,37 @@
+/* Search Bar & Autocomplete Suggestions Styles */
+.search-input-container {
+  width: 100%;
+  position: relative;
+}
+
+.search-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  border-radius: 1rem;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@keyframes searchDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-dropdown-animate {
+  animation: searchDropdownFadeIn 0.15s ease-out forwards;
+}
+
+.search-highlight-keyword {
+  color: #FF3D68;
+  font-weight: 700;
+}
