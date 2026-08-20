@@ -1,43 +1,28 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-<<<<<<< HEAD
+// Helper to generate JWT token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "default_secret", {
     expiresIn: "7d",
   });
 };
-=======
-const generateToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET || "default_secret", {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  });
->>>>>>> origin/main
 
+// Register user
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-<<<<<<< HEAD
 
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Please provide name, email, and password.",
-=======
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide all required fields (name, email, password).",
->>>>>>> origin/main
+        message: "Please fill in all fields (name, email, password).",
       });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
     const existingUser = await User.findOne({ email: normalizedEmail });
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -60,18 +45,16 @@ export const register = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Failed to register user.",
+      message: error.message || "Server error during registration.",
     });
   }
 };
 
+// Login user
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -79,13 +62,9 @@ export const login = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
     const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail });
 
-=======
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
->>>>>>> origin/main
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({
         success: false,
@@ -102,14 +81,17 @@ export const login = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Failed to log in.",
+      message: error.message || "Server error during login.",
     });
   }
 };
 
+// Get current user profile
 export const getMe = async (req, res) => {
   return res.status(200).json({
     success: true,
     user: req.user,
   });
 };
+
+

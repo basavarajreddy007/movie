@@ -1,30 +1,10 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bookmark, LockIcon, UserIcon, Loader2 } from "./components/icons";
+import { Bookmark, LockIcon, UserIcon } from "./components/icons";
 import { MovieCard } from "./components/MovieCard";
 import { useAuth } from "./context/AuthContext";
 
 function Bookmarks() {
-  const { bookmarks, isAuthenticated, refreshBookmarks } = useAuth();
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setLoading(true);
-      refreshBookmarks().finally(() => setLoading(false));
-    }
-  }, [isAuthenticated, refreshBookmarks]);
-
-  if (loading) {
-    return (
-      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center p-6 bg-[#f4f6fa] dark:bg-[#080B15]">
-        <div className="flex flex-col items-center gap-3 text-slate-500 dark:text-slate-400">
-          <Loader2 size={32} className="animate-spin text-[#FF3D68]" />
-          <p className="text-sm font-medium">Loading your bookmarks...</p>
-        </div>
-      </div>
-    );
-  }
+  const { bookmarks, isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#080B15] text-slate-900 dark:text-white transition-colors duration-200">
@@ -97,3 +77,4 @@ function Bookmarks() {
 }
 
 export default Bookmarks;
+

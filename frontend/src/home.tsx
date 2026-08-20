@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AlertCircle, SearchX } from "./components/icons";
 import type { Movie } from "./types/movies";
@@ -14,24 +14,25 @@ function Home() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
 
-  const fetchMovies = useCallback(async (searchQuery: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await getMovies(searchQuery);
-      setMovies(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load movies.");
-      setMovies([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // Fetch movies whenever the search query in URL changes
   useEffect(() => {
-    fetchMovies(query);
-  }, [query, fetchMovies]);
+    const fetchMovies = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getMovies(query);
+        setMovies(data);
+      } catch {
+        setError("Failed to load movies. Please check your connection.");
+        setMovies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMovies();
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#080B15] text-slate-900 dark:text-white transition-colors duration-200">

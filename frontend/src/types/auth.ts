@@ -2,6 +2,7 @@ import type { Movie } from "./movies";
 
 export interface User {
   id: string;
+  _id?: string;
   name: string;
   email: string;
   bookmarks?: Movie[];
