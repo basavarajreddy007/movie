@@ -2,7 +2,6 @@ import type { Movie } from "../types/movies";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
-// Get all bookmarked movies for the logged-in user
 export const fetchUserBookmarks = async (
   token: string
 ): Promise<{ success: boolean; bookmarks?: Movie[]; message?: string }> => {
@@ -38,7 +37,7 @@ export const fetchUserBookmarks = async (
   }
 };
 
-// Toggle a movie bookmark (add if not exists, remove if exists)
+
 export const toggleUserBookmark = async (
   movie: Movie,
   token: string

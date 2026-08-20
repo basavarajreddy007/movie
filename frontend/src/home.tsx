@@ -167,36 +167,35 @@ function Home() {
         {!loading && !error && movies.length > 0 && totalPages > 1 && (
           <nav
             aria-label="Pagination"
-            className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 mt-12 pt-6 border-t border-slate-200 dark:border-white/10"
+            className="flex justify-center items-center mt-12 pt-8 border-t border-slate-200 dark:border-white/10"
           >
-            <button
-              type="button"
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page <= 1}
-              className="inline-flex items-center gap-1.5 px-4 h-10 rounded-xl font-semibold text-sm bg-white dark:bg-[#121625] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 shadow-sm hover:border-[#FF3D68] hover:text-[#FF3D68] disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
-              aria-label="Previous page"
-            >
-              <ChevronLeft size={16} />
-              <span className="hidden sm:inline">Previous</span>
-            </button>
+            <div className="inline-flex bg-white dark:bg-[#121625] rounded-full p-1 border border-slate-200 dark:border-white/10 shadow-sm">
+              <button
+                type="button"
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+                className="inline-flex items-center gap-1 px-4 py-2 rounded-full font-medium text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-[#FF3D68] dark:hover:text-[#FF3D68] disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                aria-label="Previous page"
+              >
+                <ChevronLeft size={18} />
+                <span className="hidden sm:inline">Previous</span>
+              </button>
 
-            <div className="inline-flex items-center gap-1.5 px-3.5 h-10 rounded-xl bg-slate-100 dark:bg-[#121625] border border-slate-200 dark:border-white/10 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
-              <span>Page</span>
-              <span className="text-[#FF3D68]">{page}</span>
-              <span>of</span>
-              <span>{totalPages}</span>
+              <div className="flex items-center px-4 font-medium text-sm text-slate-800 dark:text-slate-200 border-x border-slate-200 dark:border-white/10 mx-1">
+                <span>Page <span className="font-bold text-[#FF3D68] mx-1">{page}</span> of {totalPages}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= totalPages}
+                className="inline-flex items-center gap-1 px-4 py-2 rounded-full font-medium text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-[#FF3D68] dark:hover:text-[#FF3D68] disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                aria-label="Next page"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight size={18} />
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page >= totalPages}
-              className="inline-flex items-center gap-1.5 px-4 h-10 rounded-xl font-semibold text-sm bg-white dark:bg-[#121625] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 shadow-sm hover:border-[#FF3D68] hover:text-[#FF3D68] disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
-              aria-label="Next page"
-            >
-              <span className="hidden sm:inline">Next</span>
-              <ChevronRight size={16} />
-            </button>
           </nav>
         )}
       </main>

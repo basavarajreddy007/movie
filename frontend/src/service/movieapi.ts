@@ -8,7 +8,7 @@ export interface MoviesResponse {
   totalPages: number;
 }
 
-const headers = {
+const headers: HeadersInit = {
   Authorization: `Bearer ${TMDB_TOKEN}`,
   "Content-Type": "application/json",
 };
@@ -43,4 +43,35 @@ export const getMovieById = async (id: string | number): Promise<Movie> => {
   }
 
   return await response.json();
+};
+
+export const getMovieTrailers = async (
+  movieId: string | number
+): Promise<string | null> => {
+  const response = await fetch(`${BASE_URL}/movie/${movieId}/videos`, {
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch movie trailer");
+  }
+
+  const data = await response.json();
+  const results = data.results || [];
+
+  const trailer =
+    results.find(
+      (video: any) => video.type === "Trailer" && video.site === "YouTube"
+    ) ||
+    results.find(
+      (video: any) => video.type === "Teaser" && video.site === "YouTube"
+    ) ||
+    results.find(
+      (video: any) =>
+        video.site === "YouTube" &&
+        (video.type === "Clip" || video.type === "Featurette")
+    ) ||
+    results.find((video: any) => video.site === "YouTube");
+
+  return trailer ? trailer.key : null;
 };

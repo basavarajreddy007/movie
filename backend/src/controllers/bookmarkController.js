@@ -1,6 +1,5 @@
 import User from "../models/User.js";
 
-// Get user bookmarks
 export const getBookmarks = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("bookmarks");
