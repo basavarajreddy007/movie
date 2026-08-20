@@ -1,73 +1,203 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { AlertCircle, SearchX } from "./components/icons";
+import { useEffect, useState, useCallback } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import {
+  AlertCircle,
+  SearchX,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  X,
+} from "./components/icons";
 import type { Movie } from "./types/movies";
 import { getMovies } from "./service/movieapi";
 import { MovieCard } from "./components/MovieCard";
 import { Loader } from "./components/Loader";
+import "./styles/home.css";
 
 function Home() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get("q")?.trim() ?? "";
 
-  // Fetch movies whenever the search query in URL changes
+  
   useEffect(() => {
-    const fetchMovies = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const data = await getMovies(query);
-        setMovies(data);
-      } catch {
-        setError("Failed to load movies. Please check your connection.");
-        setMovies([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMovies();
+    setPage(1);
   }, [query]);
 
+  const fetchMovies = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await getMovies(query, page);
+      setMovies(data.movies);
+      setTotalPages(Math.min(data.totalPages, 500)); // TMDB limits to 500 pages max
+    } catch {
+      setError("Failed to load movies. Please check your connection and try again.");
+      setMovies([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [query, page]);
+
+  useEffect(() => {
+    fetchMovies();
+  }, [fetchMovies]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleClearSearch = () => {
+    navigate("/");
+  };
+
   return (
-    <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#080B15] text-slate-900 dark:text-white transition-colors duration-200">
+    <div className="home-page-container min-h-screen bg-[#f4f6fa] dark:bg-[#080B15] text-slate-900 dark:text-white transition-colors duration-200">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-            <span className="w-2.5 h-6 rounded-full bg-gradient-to-b from-[#FF3D68] to-[#FFA06B]" />
-            <span>{query ? `Search results for "${query}"` : "Now Showing"}</span>
-          </h2>
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 pb-4 border-b border-slate-200 dark:border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="home-section-title-accent" />
+            <div>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                <span>{query ? `Search: "${query}"` : "Trending & Popular"}</span>
+                {!query && (
+                  <Sparkles size={18} className="text-[#FF3D68] hidden sm:inline" />
+                )}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                {query
+                  ? `Showing results for keyword "${query}"`
+                  : "Discover the latest movies and top-rated picks"}
+              </p>
+            </div>
+          </div>
+
+          {query && (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-200/80 dark:bg-white/10 hover:bg-[#FF3D68] hover:text-white transition-colors cursor-pointer w-fit"
+            >
+              <X size={14} />
+              <span>Clear Search</span>
+            </button>
+          )}
         </div>
 
-        {loading && <Loader title="Discovering Movies..." size="lg" />}
-
-        {error && (
-          <div className="flex items-center justify-center gap-3 py-6 px-4 mb-8 text-red-500 font-medium text-base bg-red-500/10 rounded-2xl border border-red-500/20 max-w-xl mx-auto">
-            <AlertCircle size={22} />
-            <span>{error}</span>
+        {/* Loading State */}
+        {loading && (
+          <div className="py-16">
+            <Loader
+              title={query ? `Searching for "${query}"...` : "Discovering Movies..."}
+              size="lg"
+            />
           </div>
         )}
 
-        {!loading && !error && movies.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 py-24 text-slate-500 dark:text-slate-400">
-            <SearchX size={40} className="text-[#FF3D68] opacity-60" />
-            <p className="text-base font-medium">
-              {query ? `No movies found for "${query}".` : "No movies found."}
+        {/* Error State */}
+        {error && !loading && (
+          <div className="max-w-md mx-auto my-12 p-6 rounded-2xl bg-white dark:bg-[#121625] border border-slate-200 dark:border-white/10 shadow-lg text-center">
+            <div className="w-14 h-14 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle size={28} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+              Unable to load movies
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+              {error}
             </p>
+
+            <button
+              type="button"
+              onClick={() => fetchMovies()}
+              className="inline-flex items-center justify-center gap-2 px-6 h-10 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#FF3D68] to-[#FF5E80] shadow-md hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              Try Again
+            </button>
           </div>
         )}
 
+        {/* Empty State */}
+        {!loading && !error && movies.length === 0 && (
+          <div className="flex flex-col items-center justify-center text-center py-20 px-4 max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-400 flex items-center justify-center mb-4">
+              <SearchX size={32} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
+              No movies found
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              {query
+                ? `We couldn't find any movies matching "${query}". Try searching with another term.`
+                : "No movies are currently available."}
+            </p>
+            {query && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="inline-flex items-center gap-2 px-5 h-10 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#FF3D68] to-[#FF5E80] shadow-md hover:brightness-110 transition-all cursor-pointer"
+              >
+                <span>Browse All Movies</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Movies Grid */}
         {!loading && !error && movies.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-6">
+          <div className="movies-grid-layout">
             {movies.map((movie) => (
               <MovieCard key={movie.id} movie={movie} />
             ))}
           </div>
+        )}
+
+        {/* Pagination */}
+        {!loading && !error && movies.length > 0 && totalPages > 1 && (
+          <nav
+            aria-label="Pagination"
+            className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 mt-12 pt-6 border-t border-slate-200 dark:border-white/10"
+          >
+            <button
+              type="button"
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page <= 1}
+              className="inline-flex items-center gap-1.5 px-4 h-10 rounded-xl font-semibold text-sm bg-white dark:bg-[#121625] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 shadow-sm hover:border-[#FF3D68] hover:text-[#FF3D68] disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={16} />
+              <span className="hidden sm:inline">Previous</span>
+            </button>
+
+            <div className="inline-flex items-center gap-1.5 px-3.5 h-10 rounded-xl bg-slate-100 dark:bg-[#121625] border border-slate-200 dark:border-white/10 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+              <span>Page</span>
+              <span className="text-[#FF3D68]">{page}</span>
+              <span>of</span>
+              <span>{totalPages}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page >= totalPages}
+              className="inline-flex items-center gap-1.5 px-4 h-10 rounded-xl font-semibold text-sm bg-white dark:bg-[#121625] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 shadow-sm hover:border-[#FF3D68] hover:text-[#FF3D68] disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
+              aria-label="Next page"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRight size={16} />
+            </button>
+          </nav>
         )}
       </main>
     </div>

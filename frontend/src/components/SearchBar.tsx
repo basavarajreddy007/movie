@@ -26,7 +26,7 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
 
     const timer = setTimeout(async () => {
       try {
-        const movies = await getMovies(query);
+        const { movies } = await getMovies(query);
         setSuggestions(movies.slice(0, 5));
         setShowSuggestions(true);
       } catch {
