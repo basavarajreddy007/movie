@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bookmark, Menu, X, UserIcon, LogOutIcon, Sparkles } from "./icons";
-import { SearchBar } from "./SearchBar";
+import { SearchBar, type SearchFilters } from "./SearchBar";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { useAuth } from "../context/AuthContext";
 import "../styles/navbar.css";
@@ -24,10 +24,22 @@ export function Navbar({ darkMode, setDarkMode }: Props) {
   const isBookmarksPage = location.pathname === "/bookmarks";
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
-  const handleSearch = () => {
+  // Sync searchValue with URL search param 'q'
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchValue(params.get("q") || "");
+  }, [location.search]);
+
+  const handleSearch = (filters?: SearchFilters) => {
+    const params = new URLSearchParams();
     const query = searchValue.trim();
-    if (!query) return;
-    navigate(`/?q=${encodeURIComponent(query)}`);
+    if (query) params.set("q", query);
+    if (filters?.genre) params.set("genre", filters.genre);
+    if (filters?.year) params.set("year", filters.year);
+    if (filters?.rating) params.set("rating", filters.rating);
+
+    const queryString = params.toString();
+    navigate(queryString ? `/?${queryString}` : "/");
     setIsMobileMenuOpen(false);
   };
 

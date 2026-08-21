@@ -15,11 +15,35 @@ const headers: HeadersInit = {
 
 export const getMovies = async (
   query = "",
-  page = 1
+  page = 1,
+  genre = "",
+  year = "",
+  rating = ""
 ): Promise<MoviesResponse> => {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+
+  if (query.trim()) {
+    params.set("query", query.trim());
+    if (year) {
+      params.set("primary_release_year", year);
+    }
+  } else {
+    params.set("sort_by", "popularity.desc");
+    if (genre) {
+      params.set("with_genres", genre);
+    }
+    if (year) {
+      params.set("primary_release_year", year);
+    }
+    if (rating) {
+      params.set("vote_average.gte", rating);
+    }
+  }
+
   const url = query.trim()
-    ? `${BASE_URL}/search/movie?query=${encodeURIComponent(query.trim())}&page=${page}`
-    : `${BASE_URL}/movie/popular?page=${page}`;
+    ? `${BASE_URL}/search/movie?${params.toString()}`
+    : `${BASE_URL}/discover/movie?${params.toString()}`;
 
   const response = await fetch(url, { headers });
 
@@ -28,9 +52,22 @@ export const getMovies = async (
   }
 
   const data = await response.json();
+  let movies: Movie[] = data.results || [];
+
+  if (query.trim()) {
+    if (genre) {
+      movies = movies.filter((m: any) =>
+        m.genre_ids?.includes(Number(genre)) ||
+        (Array.isArray(m.genres) && m.genres.some((g: any) => (typeof g === "object" ? g.id === Number(genre) : false)))
+      );
+    }
+    if (rating) {
+      movies = movies.filter((m: any) => (m.vote_average ?? 0) >= Number(rating));
+    }
+  }
 
   return {
-    movies: data.results || [],
+    movies,
     totalPages: data.total_pages || 1,
   };
 };
