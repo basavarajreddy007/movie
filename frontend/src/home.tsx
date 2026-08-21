@@ -11,7 +11,7 @@ import {
 import type { Movie } from "./types/movies";
 import { getMovies } from "./service/movieapi";
 import { MovieCard } from "./components/MovieCard";
-import { Loader } from "./components/Loader";
+import MovieCardSkeleton from "./components/MovieCardSkeleton";
 import "./styles/home.css";
 
 function Home() {
@@ -95,13 +95,12 @@ function Home() {
           )}
         </div>
 
-        {/* Loading State */}
+        {/* Loading Skeletons */}
         {loading && (
-          <div className="py-16">
-            <Loader
-              title={query ? `Searching for "${query}"...` : "Discovering Movies..."}
-              size="lg"
-            />
+          <div className="movies-grid-layout">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <MovieCardSkeleton key={index} />
+            ))}
           </div>
         )}
 
