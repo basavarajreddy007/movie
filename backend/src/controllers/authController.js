@@ -4,7 +4,7 @@ import User from "../models/User.js";
 // Helper to generate JWT token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "default_secret", {
-    expiresIn: "7d",
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 };
 
@@ -20,7 +20,21 @@ export const register = async (req, res) => {
       });
     }
 
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long.",
+      });
+    }
+
     const normalizedEmail = email.toLowerCase().trim();
+    if (!normalizedEmail.includes("@") || !normalizedEmail.includes(".")) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address.",
+      });
+    }
+
     const existingUser = await User.findOne({ email: normalizedEmail });
 
     if (existingUser) {

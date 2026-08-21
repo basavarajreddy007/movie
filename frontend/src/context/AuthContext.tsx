@@ -61,9 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const res = await getCurrentUser(savedToken);
         if (res.success && res.user) {
-          setUser(res.user);
+          const userWatchlist =
+            res.watchlist || res.user.watchlist || [];
+
+          setUser({ ...res.user, watchlist: userWatchlist });
           setToken(savedToken);
-          setWatchlist(res.watchlist || res.user.watchlist || []);
+          setWatchlist(userWatchlist);
         } else {
           // Token expired or invalid
           setUser(null);
@@ -88,12 +91,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     newToken: string,
     initialWatchlist?: Movie[]
   ) => {
+    const finalWatchlist = initialWatchlist ?? newUser.watchlist ?? [];
     setUser({
       ...newUser,
-      watchlist: initialWatchlist ?? newUser.watchlist ?? [],
+      watchlist: finalWatchlist,
     });
     setToken(newToken);
-    setWatchlist(initialWatchlist || newUser.watchlist || []);
+    setWatchlist(finalWatchlist);
 
     try {
       localStorage.setItem("token", newToken);
@@ -103,30 +107,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {}
   };
 
-  const isInWatchlist = (movieId: number) => {
-    return watchlist.some((movie) => movie.id === movieId);
+  const isInWatchlist = (movieId: number | string) => {
+    return watchlist.some((movie) => Number(movie.id) === Number(movieId));
   };
 
   const toggleWatchlist = async (movie: Movie) => {
-    if (!token) {
+    const currentToken = token || localStorage.getItem("token");
+    if (!currentToken) {
       setAuthError("Please sign in to manage your watchlist.");
       return false;
     }
 
-    const res = await toggleUserWatchlist(movie, token);
+    const currentlyIn = isInWatchlist(movie.id);
+    const res = await toggleUserWatchlist(movie, currentToken, currentlyIn);
 
-    if (res.success && res.watchlist) {
-      setWatchlist(res.watchlist);
-      setUser((prev) => (prev ? { ...prev, watchlist: res.watchlist } : prev));
-      return res.isInWatchlist ?? isInWatchlist(movie.id);
+    if (res.success) {
+      if (res.watchlist) {
+        setWatchlist(res.watchlist);
+        setUser((prev) => (prev ? { ...prev, watchlist: res.watchlist } : prev));
+      } else {
+        const nextWatchlist = currentlyIn
+          ? watchlist.filter((m) => Number(m.id) !== Number(movie.id))
+          : [movie, ...watchlist];
+
+        setWatchlist(nextWatchlist);
+        setUser((prev) => (prev ? { ...prev, watchlist: nextWatchlist } : prev));
+      }
+      return !currentlyIn;
     }
 
-    return isInWatchlist(movie.id);
+    return currentlyIn;
   };
 
   const refreshWatchlist = useCallback(async () => {
-    if (!token) return;
-    await loadWatchlist(token);
+    const currentToken = token || localStorage.getItem("token");
+    if (currentToken) {
+      await loadWatchlist(currentToken);
+    }
   }, [token, loadWatchlist]);
 
   const login = async (credentials: LoginCredentials) => {
@@ -142,7 +159,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: false, message: msg };
     }
 
-    const incomingWatchlist = res.watchlist || res.user.watchlist || [];
+    const incomingWatchlist =
+      res.watchlist || res.user.watchlist || [];
+
     saveAuthSession(res.user, res.token, incomingWatchlist);
 
     return { success: true };
@@ -161,7 +180,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: false, message: msg };
     }
 
-    const incomingWatchlist = res.watchlist || res.user.watchlist || [];
+    const incomingWatchlist =
+      res.watchlist || res.user.watchlist || [];
+
     saveAuthSession(res.user, res.token, incomingWatchlist);
 
     return { success: true };

@@ -26,11 +26,11 @@ export const getWatchlist = async (req, res) => {
 export const toggleWatchlist = async (req, res) => {
   try {
     const movie = req.body;
-
-    if (!movie?.id) {
+    const movieId = Number(movie?.id);
+    if (!movie || isNaN(movieId)) {
       return res.status(400).json({
         success: false,
-        message: "Movie data with id is required.",
+        message: "Valid movie data with numeric id is required.",
       });
     }
 
@@ -43,10 +43,8 @@ export const toggleWatchlist = async (req, res) => {
       });
     }
 
-    const movieId = Number(movie.id);
-
     const existingIndex = user.watchlist.findIndex(
-      (item) => item.id === movieId
+      (item) => Number(item.id) === movieId
     );
 
     const exists = existingIndex !== -1;
@@ -54,11 +52,11 @@ export const toggleWatchlist = async (req, res) => {
     if (exists) {
       user.watchlist.splice(existingIndex, 1);
     } else {
-      user.watchlist.push({
+      user.watchlist.unshift({
         id: movieId,
         title: movie.title || "",
         poster_path: movie.poster_path || null,
-        vote_average: movie.vote_average || 0,
+        vote_average: typeof movie.vote_average === "number" ? movie.vote_average : Number(movie.vote_average) || 0,
         release_date: movie.release_date || "",
         overview: movie.overview || "",
         addedAt: new Date(),

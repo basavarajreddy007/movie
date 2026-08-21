@@ -1,14 +1,25 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Play, Star, Calendar, AlertCircle, ChevronLeft, Loader2 } from "./icons";
+import {
+  Play,
+  Star,
+  Calendar,
+  AlertCircle,
+  ChevronLeft,
+  Loader2,
+  Check,
+  Plus,
+} from "./icons";
 import type { Movie } from "../types/movies";
 import { getMovieById, getMovieTrailers } from "../service/movieapi";
+import { useAuth } from "../context/AuthContext";
 import { Loader } from "./Loader";
 import "../styles/movieDetails.css";
 
 export function MovieDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isInWatchlist, toggleWatchlist, isAuthenticated } = useAuth();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +27,8 @@ export function MovieDetails() {
   const [imageError, setImageError] = useState(false);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [trailerLoading, setTrailerLoading] = useState(false);
+  const [trailerMessage, setTrailerMessage] = useState<string | null>(null);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
 
   // Fetch movie details on page load
   useEffect(() => {
@@ -37,9 +50,24 @@ export function MovieDetails() {
     fetchDetails();
   }, [id]);
 
+  const handleWatchlistToggle = async () => {
+    if (!movie) return;
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    setWatchlistLoading(true);
+    try {
+      await toggleWatchlist(movie);
+    } finally {
+      setWatchlistLoading(false);
+    }
+  };
+
   // Called when user clicks "Watch Trailer"
   const handleWatchTrailer = async () => {
     if (!movie) return;
+    setTrailerMessage(null);
 
     // If trailer key already exists, simply scroll to trailer section
     if (trailerKey) {
@@ -55,9 +83,11 @@ export function MovieDetails() {
         setTimeout(() => {
           document.getElementById("trailer-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
+      } else {
+        setTrailerMessage("No official trailer found for this movie.");
       }
     } catch {
-      // Ignore or handle gracefully without extra error state
+      setTrailerMessage("Unable to load trailer right now.");
     } finally {
       setTrailerLoading(false);
     }
@@ -225,8 +255,8 @@ export function MovieDetails() {
               {movie.overview || "No overview available for this movie."}
             </p>
 
-            {/* Actions: Watch Trailer Button */}
-            <div className="w-full flex items-center pt-2">
+            {/* Actions: Watch Trailer & Watchlist Buttons */}
+            <div className="w-full flex flex-wrap items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleWatchTrailer}
@@ -242,7 +272,38 @@ export function MovieDetails() {
                 </span>
                 <span>{trailerLoading ? "Loading Trailer..." : "Watch Trailer"}</span>
               </button>
+
+              <button
+                type="button"
+                onClick={handleWatchlistToggle}
+                disabled={watchlistLoading}
+                className={`inline-flex items-center justify-center gap-2 h-[3.125rem] px-5 rounded-[0.875rem] font-bold text-sm border transition-all cursor-pointer select-none ${
+                  movie && isInWatchlist(movie.id)
+                    ? "bg-[#FF3D68] border-[#FF3D68] text-white shadow-lg shadow-[#FF3D68]/30 hover:brightness-110"
+                    : "bg-white dark:bg-[#121625] border-slate-300 dark:border-white/20 text-slate-800 dark:text-white hover:border-[#FF3D68] hover:text-[#FF3D68]"
+                }`}
+              >
+                {watchlistLoading ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : movie && isInWatchlist(movie.id) ? (
+                  <Check size={18} />
+                ) : (
+                  <Plus size={18} />
+                )}
+                <span>
+                  {movie && isInWatchlist(movie.id)
+                    ? "In Watchlist"
+                    : "Add to Watchlist"}
+                </span>
+              </button>
             </div>
+
+            {trailerMessage && (
+              <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 mt-2.5 flex items-center gap-1.5">
+                <AlertCircle size={14} />
+                <span>{trailerMessage}</span>
+              </p>
+            )}
           </div>
         </div>
 

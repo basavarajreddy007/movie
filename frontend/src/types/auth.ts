@@ -36,7 +36,7 @@ export interface AuthContextType {
   authError: string | null;
   watchlist: Movie[];
   watchlistCount: number;
-  isInWatchlist: (movieId: number) => boolean;
+  isInWatchlist: (movieId: number | string) => boolean;
   toggleWatchlist: (movie: Movie) => Promise<boolean>;
   refreshWatchlist: () => Promise<void>;
   login: (

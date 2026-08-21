@@ -1,17 +1,19 @@
 import type { Movie } from "../types/movies";
 
-const BASE_URL = "https://api.tmdb.org/3";
-const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN;
+const BASE_URL = "https://api.themoviedb.org/3";
+const TMDB_TOKEN =
+  import.meta.env.VITE_TMDB_TOKEN ||
+  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGZjYTEyYWQ2NDI0OTM4ZDdlMmFmMjZiMjExOWI5YiIsIm5iZiI6MTc4NjYxMzEzMC4xMDksInN1YiI6IjZhN2Q4ZDhhMzFiZDIzODA5MjQ0MzUyMyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.eirqkTGaTFD9cQUvKICakpz03589Ksbc6jEgNxVM5gw";
 
 export interface MoviesResponse {
   movies: Movie[];
   totalPages: number;
 }
 
-const headers: HeadersInit = {
+const getHeaders = (): HeadersInit => ({
   Authorization: `Bearer ${TMDB_TOKEN}`,
   "Content-Type": "application/json",
-};
+});
 
 export const getMovies = async (
   query = "",
@@ -45,7 +47,7 @@ export const getMovies = async (
     ? `${BASE_URL}/search/movie?${params.toString()}`
     : `${BASE_URL}/discover/movie?${params.toString()}`;
 
-  const response = await fetch(url, { headers });
+  const response = await fetch(url, { headers: getHeaders() });
 
   if (!response.ok) {
     throw new Error("Failed to fetch movies");
@@ -73,7 +75,7 @@ export const getMovies = async (
 };
 
 export const getMovieById = async (id: string | number): Promise<Movie> => {
-  const response = await fetch(`${BASE_URL}/movie/${id}`, { headers });
+  const response = await fetch(`${BASE_URL}/movie/${id}`, { headers: getHeaders() });
 
   if (!response.ok) {
     throw new Error("Failed to fetch movie details");
@@ -86,7 +88,7 @@ export const getMovieTrailers = async (
   movieId: string | number
 ): Promise<string | null> => {
   const response = await fetch(`${BASE_URL}/movie/${movieId}/videos`, {
-    headers,
+    headers: getHeaders(),
   });
 
   if (!response.ok) {

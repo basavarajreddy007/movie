@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const movieSchema = {
-  id: { type: Number, required: true },
-  title: { type: String, default: "" },
-  poster_path: { type: String, default: null },
-  vote_average: { type: Number, default: 0 },
-  release_date: { type: String, default: "" },
-  overview: { type: String, default: "" },
-  addedAt: { type: Date, default: Date.now },
-};
+const movieSchema = new mongoose.Schema(
+  {
+    id: { type: Number, required: true },
+    title: { type: String, default: "" },
+    poster_path: { type: String, default: null },
+    vote_average: { type: Number, default: 0 },
+    release_date: { type: String, default: "" },
+    overview: { type: String, default: "" },
+    addedAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
 
 const userSchema = new mongoose.Schema(
   {

@@ -30,6 +30,20 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 
+// 404 Handler for undefined routes
+app.use((_req, res) => {
+  res.status(404).json({ success: false, message: "Resource not found" });
+});
+
+// Centralized error handler
+app.use((err, _req, res, _next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal server error",
+  });
+});
+
 // Connect to MongoDB and start server
 connectDB().then(() => {
   app.listen(PORT, () => {

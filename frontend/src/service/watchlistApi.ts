@@ -1,24 +1,21 @@
 import type { Movie } from "../types/movies";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+const BACKEND_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
-// Fetch the logged-in user's watchlist from MongoDB backend
+// Fetch movies from user's watchlist in backend MongoDB
 export const fetchWatchlist = async (
-  token: string
+  token?: string
 ): Promise<{
   success: boolean;
   watchlist?: Movie[];
   message?: string;
 }> => {
   if (!token) {
-    return {
-      success: false,
-      message: "Authentication token is required.",
-    };
+    return { success: false, watchlist: [], message: "No token provided." };
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/api/watchlist`, {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/watchlist`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -28,29 +25,32 @@ export const fetchWatchlist = async (
 
     const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
+    if (res.ok && data.success) {
       return {
-        success: false,
-        message: data.message || "Failed to load watchlist.",
+        success: true,
+        watchlist: data.watchlist || [],
       };
     }
 
     return {
-      success: true,
-      watchlist: data.watchlist || [],
+      success: false,
+      watchlist: [],
+      message: data.message || "Failed to load watchlist",
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       success: false,
-      message: (error as Error).message || "Unable to connect to backend server.",
+      watchlist: [],
+      message: error?.message || "Unable to reach server",
     };
   }
 };
 
-// Toggle a movie in the logged-in user's MongoDB watchlist
+// Store (Add/Remove) a movie in user's watchlist in backend MongoDB
 export const toggleUserWatchlist = async (
   movie: Movie,
-  token: string
+  token?: string,
+  isCurrentlyInWatchlist: boolean = false
 ): Promise<{
   success: boolean;
   isInWatchlist?: boolean;
@@ -60,12 +60,13 @@ export const toggleUserWatchlist = async (
   if (!token) {
     return {
       success: false,
-      message: "Please sign in to manage your watchlist.",
+      isInWatchlist: isCurrentlyInWatchlist,
+      message: "Please log in to manage your watchlist.",
     };
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/api/watchlist/toggle`, {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/watchlist/toggle`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -73,33 +74,35 @@ export const toggleUserWatchlist = async (
       },
       body: JSON.stringify({
         id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        vote_average: movie.vote_average,
-        release_date: movie.release_date,
-        overview: movie.overview,
+        title: movie.title || "",
+        poster_path: movie.poster_path || null,
+        vote_average: movie.vote_average || 0,
+        release_date: movie.release_date || "",
+        overview: movie.overview || "",
       }),
     });
 
     const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
+    if (res.ok && data.success) {
       return {
-        success: false,
-        message: data.message || "Failed to update watchlist.",
+        success: true,
+        isInWatchlist: data.isInWatchlist,
+        watchlist: data.watchlist || [],
+        message: data.message,
       };
     }
 
     return {
-      success: true,
-      isInWatchlist: data.isInWatchlist,
-      watchlist: data.watchlist || [],
-      message: data.message,
+      success: false,
+      isInWatchlist: isCurrentlyInWatchlist,
+      message: data.message || "Failed to update watchlist.",
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       success: false,
-      message: (error as Error).message || "Unable to connect to backend server.",
+      isInWatchlist: isCurrentlyInWatchlist,
+      message: error?.message || "Unable to reach server",
     };
   }
 };
@@ -108,3 +111,5 @@ export default {
   fetchWatchlist,
   toggleUserWatchlist,
 };
+
+
