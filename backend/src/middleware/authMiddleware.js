@@ -19,8 +19,16 @@ export const protect = async (req, res, next) => {
     });
   }
 
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.error("JWT_SECRET is not configured on the server.");
+    return res.status(500).json({
+      success: false,
+      message: "Server configuration error: authentication secret missing.",
+    });
+  }
+
   try {
-    const secret = process.env.JWT_SECRET || "default_secret";
     const decoded = jwt.verify(token, secret);
 
     const user = await User.findById(decoded.id).select("-password");

@@ -1,19 +1,23 @@
 import type { Movie } from "../types/movies";
 
 const BASE_URL = "https://api.themoviedb.org/3";
-const TMDB_TOKEN =
-  import.meta.env.VITE_TMDB_TOKEN ||
-  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGZjYTEyYWQ2NDI0OTM4ZDdlMmFmMjZiMjExOWI5YiIsIm5iZiI6MTc4NjYxMzEzMC4xMDksInN1YiI6IjZhN2Q4ZDhhMzFiZDIzODA5MjQ0MzUyMyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.eirqkTGaTFD9cQUvKICakpz03589Ksbc6jEgNxVM5gw";
+const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN;
 
 export interface MoviesResponse {
   movies: Movie[];
   totalPages: number;
 }
 
-const getHeaders = (): HeadersInit => ({
-  Authorization: `Bearer ${TMDB_TOKEN}`,
-  "Content-Type": "application/json",
-});
+const getHeaders = (): HeadersInit => {
+  if (!TMDB_TOKEN) {
+    console.warn("VITE_TMDB_TOKEN is not defined. Please set it in your .env file.");
+  }
+
+  return {
+    Authorization: `Bearer ${TMDB_TOKEN || ""}`,
+    "Content-Type": "application/json",
+  };
+};
 
 export const getMovies = async (
   query = "",

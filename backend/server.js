@@ -7,6 +7,12 @@ import watchlistRoutes from "./src/routes/watchlistRoutes.js";
 
 dotenv.config();
 
+// Ensure required security environment variables exist
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL CONFIG ERROR: JWT_SECRET environment variable is not defined.");
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
