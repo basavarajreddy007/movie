@@ -1,10 +1,17 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Check, LockIcon, UserIcon } from "./components/icons";
 import { MovieCard } from "./components/MovieCard";
 import { useAuth } from "./context/AuthContext";
 
 function Watchlist() {
-  const { watchlist, isAuthenticated } = useAuth();
+  const { watchlist, isAuthenticated, refreshWatchlist } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshWatchlist();
+    }
+  }, [isAuthenticated, refreshWatchlist]);
 
   return (
     <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#080B15] text-slate-900 dark:text-white">

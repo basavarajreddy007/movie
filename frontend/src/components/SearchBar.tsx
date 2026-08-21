@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, X, SlidersHorizontal, Star, Clapperboard } from "./icons";
+import { Search, X, SlidersHorizontal, Star } from "./icons";
 import { getMovies } from "../service/movieapi";
 import type { Movie } from "../types/movies";
 
@@ -39,18 +39,8 @@ const GENRES = [
 ];
 
 const YEARS = [
-  "2026",
-  "2025",
-  "2024",
-  "2023",
-  "2022",
-  "2021",
-  "2020",
-  "2019",
-  "2018",
-  "2015",
-  "2010",
-  "2000",
+  "2026", "2025", "2024", "2023", "2022", "2021",
+  "2020", "2019", "2018", "2015", "2010", "2000",
 ];
 
 const RATINGS = [
@@ -61,55 +51,58 @@ const RATINGS = [
   { value: "5", label: "5.0+ Mixed" },
 ];
 
+const SELECT_CLASSES =
+  "w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0F1322] text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-[#FF3D68] transition-colors";
+
 export function SearchBar({ value, onChange, onSearch, loading = false }: Props) {
   const [suggestions, setSuggestions] = useState<Movie[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const [searchParams] = useSearchParams();
-  const [genre, setGenre] = useState(searchParams.get("genre") || "");
-  const [year, setYear] = useState(searchParams.get("year") || "");
-  const [rating, setRating] = useState(searchParams.get("rating") || "");
+  const [filters, setFilters] = useState<SearchFilters>({
+    genre: searchParams.get("genre") || "",
+    year: searchParams.get("year") || "",
+    rating: searchParams.get("rating") || "",
+  });
 
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync filter state when URL search params change
+  // Sync filters with URL search params
   useEffect(() => {
-    setGenre(searchParams.get("genre") || "");
-    setYear(searchParams.get("year") || "");
-    setRating(searchParams.get("rating") || "");
+    setFilters({
+      genre: searchParams.get("genre") || "",
+      year: searchParams.get("year") || "",
+      rating: searchParams.get("rating") || "",
+    });
   }, [searchParams]);
 
-  // Close popups when clicking outside or pressing Escape
+  // Close dropdowns on outside click or Escape key
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
+    const handleClosePopups = (e: MouseEvent | KeyboardEvent) => {
+      const isOutsideClick =
+        e instanceof MouseEvent &&
         containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
+        !containerRef.current.contains(e.target as Node);
+      const isEscapeKey = e instanceof KeyboardEvent && e.key === "Escape";
+
+      if (isOutsideClick || isEscapeKey) {
         setShowSuggestions(false);
         setShowFilters(false);
       }
     };
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setShowSuggestions(false);
-        setShowFilters(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClosePopups);
+    document.addEventListener("keydown", handleClosePopups);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClosePopups);
+      document.removeEventListener("keydown", handleClosePopups);
     };
   }, []);
 
-  // Fetch quick suggestions as user types
+  // Fetch search suggestions as user types (debounced 300ms)
   useEffect(() => {
     const query = value.trim();
     if (!query) {
@@ -130,71 +123,56 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
     return () => clearTimeout(timer);
   }, [value]);
 
-  const handleSelect = (movie: Movie) => {
+  const applySearch = (activeFilters: SearchFilters = filters) => {
+    setShowFilters(false);
+    setShowSuggestions(false);
+    onSearch({
+      genre: activeFilters.genre || undefined,
+      year: activeFilters.year || undefined,
+      rating: activeFilters.rating || undefined,
+    });
+  };
+
+  const handleSelectSuggestion = (movie: Movie) => {
     setShowSuggestions(false);
     setShowFilters(false);
     navigate(`/movie/${movie.id}`);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowSuggestions(false);
-    setShowFilters(false);
-    onSearch({
-      genre: genre || undefined,
-      year: year || undefined,
-      rating: rating || undefined,
-    });
-  };
-
-  const handleApplyFilters = () => {
-    setShowFilters(false);
-    setShowSuggestions(false);
-    onSearch({
-      genre: genre || undefined,
-      year: year || undefined,
-      rating: rating || undefined,
-    });
-  };
-
   const handleResetFilters = () => {
-    setGenre("");
-    setYear("");
-    setRating("");
-    setShowFilters(false);
-    onSearch({
-      genre: undefined,
-      year: undefined,
-      rating: undefined,
-    });
+    const emptyFilters = { genre: "", year: "", rating: "" };
+    setFilters(emptyFilters);
+    applySearch(emptyFilters);
   };
 
-  const handleClear = () => {
+  const handleClearInput = () => {
     onChange("");
     setSuggestions([]);
     setShowSuggestions(false);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    inputRef.current?.focus();
   };
 
-  const hasActiveFilters = Boolean(genre || year || rating);
-  const activeFiltersCount = [genre, year, rating].filter(Boolean).length;
+  const activeFiltersCount = Object.values(filters).filter(Boolean).length;
+  const hasActiveFilters = activeFiltersCount > 0;
 
   return (
     <div className="w-full relative" ref={containerRef}>
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          applySearch();
+        }}
+        className="flex items-center gap-2"
+      >
         <div className="relative flex-1 flex items-center">
-          {/* Left search icon inside input */}
           <Search
             size={16}
             className="absolute left-3.5 text-slate-400 pointer-events-none z-10"
           />
 
-          {/* Main search text input */}
           <input
             ref={inputRef}
-            className="w-full h-10 sm:h-11 pl-10 pr-20 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0F1322] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none focus:border-[#FF3D68] focus:ring-2 focus:ring-[#FF3D68]/20 transition-all"
+            className="w-full h-10 pl-10 pr-20 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0F1322] text-slate-900 dark:text-white placeholder-slate-400 text-sm outline-none focus:border-[#FF3D68] focus:ring-2 focus:ring-[#FF3D68]/20 transition-all leading-normal"
             type="text"
             placeholder="Search movies by title..."
             value={value}
@@ -208,13 +186,12 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
             disabled={loading}
           />
 
-          {/* Action buttons inside right of input: Clear & Filter toggle */}
           <div className="absolute right-2.5 flex items-center gap-1.5 z-10">
             {value.trim() && (
               <button
                 type="button"
                 className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-200 dark:bg-white/10 text-slate-500 hover:bg-[#FF3D68] hover:text-white transition-colors cursor-pointer"
-                onClick={handleClear}
+                onClick={handleClearInput}
                 title="Clear input"
               >
                 <X size={12} />
@@ -247,18 +224,17 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
           </div>
         </div>
 
-        {/* Search submit button */}
         <button
           type="submit"
           disabled={loading || (!value.trim() && !hasActiveFilters)}
-          className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 h-10 sm:h-11 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-[#FF3D68] to-[#FF5E80] shadow-md hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+          className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-[#FF3D68] to-[#FF5E80] shadow-md hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all cursor-pointer leading-none"
         >
           <Search size={16} />
           <span className="hidden sm:inline">Search</span>
         </button>
       </form>
 
-      {/* Filter Modal / Popover */}
+      {/* Filter Popover */}
       {showFilters && (
         <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-80 p-4 rounded-2xl bg-white dark:bg-[#121625] border border-slate-200 dark:border-white/10 shadow-2xl transition-all">
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-white/10">
@@ -280,15 +256,14 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
           </div>
 
           <div className="space-y-3.5">
-            {/* Genre Select */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                 Genre
               </label>
               <select
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0F1322] text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-[#FF3D68] transition-colors"
+                value={filters.genre}
+                onChange={(e) => setFilters((prev) => ({ ...prev, genre: e.target.value }))}
+                className={SELECT_CLASSES}
               >
                 <option value="">All Genres</option>
                 {GENRES.map((g) => (
@@ -299,15 +274,14 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
               </select>
             </div>
 
-            {/* Year Select */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                 Release Year
               </label>
               <select
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0F1322] text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-[#FF3D68] transition-colors"
+                value={filters.year}
+                onChange={(e) => setFilters((prev) => ({ ...prev, year: e.target.value }))}
+                className={SELECT_CLASSES}
               >
                 <option value="">Any Year</option>
                 {YEARS.map((y) => (
@@ -318,15 +292,14 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
               </select>
             </div>
 
-            {/* Rating Select */}
             <div>
               <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                 Minimum Rating
               </label>
               <select
-                value={rating}
-                onChange={(e) => setRating(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0F1322] text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-[#FF3D68] transition-colors"
+                value={filters.rating}
+                onChange={(e) => setFilters((prev) => ({ ...prev, rating: e.target.value }))}
+                className={SELECT_CLASSES}
               >
                 <option value="">Any Rating</option>
                 {RATINGS.map((r) => (
@@ -348,7 +321,7 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
             </button>
             <button
               type="button"
-              onClick={handleApplyFilters}
+              onClick={() => applySearch()}
               className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-[#FF3D68] to-[#FF5E80] shadow hover:brightness-110 transition-all cursor-pointer"
             >
               Apply Filters
@@ -357,50 +330,34 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
         </div>
       )}
 
-      {/* Suggestions Dropdown */}
+      {/* Autocomplete Suggestions Dropdown */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute top-[calc(100%+8px)] left-0 right-0 z-50 rounded-2xl bg-white dark:bg-[#121625] border border-slate-200 dark:border-white/10 shadow-2xl p-2 max-h-96 overflow-y-auto">
           <ul className="divide-y divide-slate-100 dark:divide-white/5">
             {suggestions.map((movie) => {
-              const releaseYear = movie.release_date
-                ? movie.release_date.split("-")[0]
-                : "";
-              const posterUrl = movie.poster_path
-                ? `https://image.tmdb.org/t/p/w92${movie.poster_path}`
-                : null;
+              const releaseYear = movie.release_date ? movie.release_date.split("-")[0] : "";
 
               return (
                 <li
                   key={movie.id}
-                  onClick={() => handleSelect(movie)}
-                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-[#0F1322] cursor-pointer text-slate-800 dark:text-slate-200 transition-colors group"
+                  onClick={() => handleSelectSuggestion(movie)}
+                  className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#0F1322] cursor-pointer text-slate-800 dark:text-slate-200 transition-colors group"
                 >
-                  <div className="w-9 h-12 rounded-lg bg-slate-200 dark:bg-white/5 overflow-hidden flex-shrink-0 flex items-center justify-center text-slate-400">
-                    {posterUrl ? (
-                      <img
-                        src={posterUrl}
-                        alt={movie.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <Clapperboard size={18} />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <Search size={14} className="text-slate-400 group-hover:text-[#FF3D68] flex-shrink-0 transition-colors" />
                     <p className="font-semibold text-sm truncate text-slate-900 dark:text-white group-hover:text-[#FF3D68] transition-colors">
                       {movie.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      {releaseYear && <span>{releaseYear}</span>}
-                      {typeof movie.vote_average === "number" && movie.vote_average > 0 && (
-                        <span className="flex items-center gap-1 font-medium text-amber-500">
-                          <Star size={11} fill="currentColor" />
-                          {movie.vote_average.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 flex-shrink-0">
+                    {releaseYear && <span>{releaseYear}</span>}
+                    {typeof movie.vote_average === "number" && movie.vote_average > 0 && (
+                      <span className="flex items-center gap-1 font-medium text-amber-500">
+                        <Star size={11} fill="currentColor" />
+                        {movie.vote_average.toFixed(1)}
+                      </span>
+                    )}
                   </div>
                 </li>
               );
@@ -413,3 +370,4 @@ export function SearchBar({ value, onChange, onSearch, loading = false }: Props)
 }
 
 export default SearchBar;
+

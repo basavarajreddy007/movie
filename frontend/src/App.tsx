@@ -13,11 +13,20 @@ import Watchlist from "./watchlist";
 import { Navbar } from "./components/navbar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./loginPage";
+import Loader from "./components/Loader";
 
 // Route guard: Only authenticated users can access
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f6fa] dark:bg-[#080B15]">
+        <Loader title="Loading..." size="lg" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -28,7 +37,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // Route guard: Redirect logged-in users away from login/register
 function PublicAuthRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f6fa] dark:bg-[#080B15]">
+        <Loader title="Loading..." size="lg" />
+      </div>
+    );
+  }
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
