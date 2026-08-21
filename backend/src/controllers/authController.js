@@ -41,6 +41,7 @@ export const register = async (req, res) => {
       message: "Account created successfully.",
       token: generateToken(user._id),
       user,
+      watchlist: user.watchlist || [],
     });
   } catch (error) {
     return res.status(500).json({
@@ -77,6 +78,7 @@ export const login = async (req, res) => {
       message: "Logged in successfully.",
       token: generateToken(user._id),
       user,
+      watchlist: user.watchlist || [],
     });
   } catch (error) {
     return res.status(500).json({
@@ -91,6 +93,7 @@ export const getMe = async (req, res) => {
   return res.status(200).json({
     success: true,
     user: req.user,
+    watchlist: req.user.watchlist || [],
   });
 };
 

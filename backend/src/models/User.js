@@ -1,6 +1,16 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+const movieSchema = {
+  id: { type: Number, required: true },
+  title: { type: String, default: "" },
+  poster_path: { type: String, default: null },
+  vote_average: { type: Number, default: 0 },
+  release_date: { type: String, default: "" },
+  overview: { type: String, default: "" },
+  addedAt: { type: Date, default: Date.now },
+};
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -20,17 +30,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters long"],
     },
-    bookmarks: [
-      {
-        id: { type: Number, required: true },
-        title: { type: String, default: "" },
-        poster_path: { type: String, default: null },
-        vote_average: { type: Number, default: 0 },
-        release_date: { type: String, default: "" },
-        overview: { type: String, default: "" },
-        addedAt: { type: Date, default: Date.now },
-      },
-    ],
+    watchlist: [movieSchema],
   },
   {
     timestamps: true,
@@ -46,20 +46,16 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash password before saving
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) {
-    return;
-  }
+  if (!this.isModified("password")) return;
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Compare entered password with hashed password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 export const User = mongoose.model("User", userSchema);
 export default User;
-

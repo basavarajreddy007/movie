@@ -6,7 +6,6 @@
 @import "./styles/movieCard.css";
 @import "./styles/movieDetails.css";
 @import "./styles/searchBar.css";
-@import "./styles/bookmarks.css";
 @import "./styles/home.css";
 
 @variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));

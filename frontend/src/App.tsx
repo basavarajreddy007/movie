@@ -9,7 +9,7 @@ import {
 
 import Home from "./home";
 import MovieDetails from "./components/movieDetails";
-import Bookmarks from "./bookmarks";
+import Watchlist from "./watchlist";
 import { Navbar } from "./components/navbar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./loginPage";
@@ -87,13 +87,14 @@ function App() {
             }
           />
           <Route
-            path="/bookmarks"
+            path="/watchlist"
             element={
               <ProtectedRoute>
-                <Bookmarks />
+                <Watchlist />
               </ProtectedRoute>
             }
           />
+          <Route path="/bookmarks" element={<Navigate to="/watchlist" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
@@ -101,4 +102,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;

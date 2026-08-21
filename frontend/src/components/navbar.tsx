@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Bookmark, Menu, X, UserIcon, LogOutIcon, Sparkles } from "./icons";
+import {
+  Check,
+  Menu,
+  X,
+  UserIcon,
+  LogOutIcon,
+  Sparkles,
+} from "./icons";
 import { SearchBar, type SearchFilters } from "./SearchBar";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { useAuth } from "../context/AuthContext";
@@ -16,12 +23,17 @@ export function Navbar({ darkMode, setDarkMode }: Props) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const { user, isAuthenticated, bookmarkCount, logout } = useAuth();
+ const {
+  user,
+  isAuthenticated,
+  watchlistCount,
+  logout,
+} = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const isMovieDetailPage = location.pathname.startsWith("/movie");
-  const isBookmarksPage = location.pathname === "/bookmarks";
+ const isWatchlistPage = location.pathname === "/watchlist";
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   // Sync searchValue with URL search param 'q'
@@ -80,24 +92,25 @@ export function Navbar({ darkMode, setDarkMode }: Props) {
 
         {/* Desktop Controls */}
         <div className="order-2 md:order-3 flex items-center gap-3 flex-shrink-0">
-          {/* Bookmarks Link */}
+          {/* Watchlist Link */}
           {isAuthenticated && (
-            <Link
-              to="/bookmarks"
-              className={`hidden md:inline-flex items-center gap-2 px-4 h-10 sm:h-11 rounded-xl font-semibold text-sm border transition-all ${
-                isBookmarksPage
-                  ? "bg-[#FF3D68] border-[#FF3D68] text-white"
-                  : "bg-white dark:bg-[#121625] border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-[#FF3D68] hover:text-white"
-              }`}
-            >
-              <Bookmark size={18} />
-              <span>Bookmarks</span>
-              {bookmarkCount > 0 && (
-                <span className="nav-bookmark-badge bg-[#FF3D68] text-white">
-                  {bookmarkCount}
-                </span>
-              )}
-            </Link>
+           <Link
+  to="/watchlist"
+  className={`hidden md:inline-flex items-center gap-2 px-4 h-10 sm:h-11 rounded-xl font-semibold text-sm border transition-all ${
+    isWatchlistPage
+      ? "bg-[#FF3D68] border-[#FF3D68] text-white"
+      : "bg-white dark:bg-[#121625] border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-[#FF3D68] hover:text-white"
+  }`}
+>
+  <Check size={18} />
+  <span>Watchlist</span>
+
+  {watchlistCount > 0 && (
+    <span className="nav-watchlist-badge bg-[#FF3D68] text-white">
+      {watchlistCount}
+    </span>
+  )}
+</Link>
           )}
 
           {/* Theme Switcher */}
@@ -206,21 +219,21 @@ export function Navbar({ darkMode, setDarkMode }: Props) {
 
           {isAuthenticated && (
             <Link
-              to="/bookmarks"
+              to="/watchlist"
               onClick={() => setIsMobileMenuOpen(false)}
               className={`flex items-center justify-between p-2.5 rounded-xl border font-semibold text-sm transition-colors ${
-                isBookmarksPage
+                isWatchlistPage
                   ? "bg-[#FF3D68] border-[#FF3D68] text-white"
                   : "bg-slate-50 dark:bg-[#121625] border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200"
               }`}
             >
               <div className="flex items-center gap-2">
-                <Bookmark size={18} />
-                <span>Bookmarks</span>
+                <Check size={18} />
+                <span>Watchlist</span>
               </div>
-              {bookmarkCount > 0 && (
-                <span className="min-w-5 h-5 px-1.5 rounded-full text-xs font-bold bg-[#FF3D68] text-white flex items-center justify-center">
-                  {bookmarkCount}
+              {watchlistCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[#FF3D68] text-white">
+                  {watchlistCount}
                 </span>
               )}
             </Link>
@@ -238,4 +251,4 @@ export function Navbar({ darkMode, setDarkMode }: Props) {
   );
 }
 
-export default Navbar;
+export default Navbar;

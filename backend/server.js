@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./src/config/db.js";
 import authRoutes from "./src/routes/authRoutes.js";
-import bookmarkRoutes from "./src/routes/bookmarkRoutes.js";
+import watchlistRoutes from "./src/routes/watchlistRoutes.js";
 
 dotenv.config();
 
@@ -28,7 +28,7 @@ app.get("/api/health", (_req, res) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/bookmarks", bookmarkRoutes);
+app.use("/api/watchlist", watchlistRoutes);
 
 // Connect to MongoDB and start server
 connectDB().then(() => {

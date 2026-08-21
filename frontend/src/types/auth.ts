@@ -5,7 +5,7 @@ export interface User {
   _id?: string;
   name: string;
   email: string;
-  bookmarks?: Movie[];
+  watchlist?: Movie[];
   createdAt?: string;
 }
 
@@ -14,6 +14,7 @@ export interface AuthResponse {
   message?: string;
   token?: string;
   user?: User;
+  watchlist?: Movie[];
 }
 
 export interface LoginCredentials {
@@ -33,13 +34,17 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   authError: string | null;
-  bookmarks: Movie[];
-  bookmarkCount: number;
-  isBookmarked: (movieId: number) => boolean;
-  toggleBookmark: (movie: Movie) => Promise<boolean>;
-  refreshBookmarks: () => Promise<void>;
-  login: (credentials: LoginCredentials) => Promise<{ success: boolean; message?: string }>;
-  register: (credentials: RegisterCredentials) => Promise<{ success: boolean; message?: string }>;
+  watchlist: Movie[];
+  watchlistCount: number;
+  isInWatchlist: (movieId: number) => boolean;
+  toggleWatchlist: (movie: Movie) => Promise<boolean>;
+  refreshWatchlist: () => Promise<void>;
+  login: (
+    credentials: LoginCredentials
+  ) => Promise<{ success: boolean; message?: string }>;
+  register: (
+    credentials: RegisterCredentials
+  ) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   clearAuthError: () => void;
 }

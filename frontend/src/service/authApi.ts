@@ -27,6 +27,7 @@ const postAuth = async (endpoint: string, data: object): Promise<AuthResponse> =
       success: true,
       token: result.token,
       user: result.user,
+      watchlist: result.watchlist || result.user?.watchlist || [],
       message: result.message,
     };
   } catch {
@@ -80,6 +81,7 @@ export const getCurrentUser = async (token: string): Promise<AuthResponse> => {
       success: true,
       token,
       user: result.user,
+      watchlist: result.watchlist || result.user?.watchlist || [],
     };
   } catch {
     return {

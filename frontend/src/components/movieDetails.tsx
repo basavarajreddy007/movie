@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Play, Star, Calendar, AlertCircle, Bookmark, ChevronLeft, Loader2 } from "./icons";
+import { Play, Star, Calendar, AlertCircle, ChevronLeft, Loader2 } from "./icons";
 import type { Movie } from "../types/movies";
 import { getMovieById, getMovieTrailers } from "../service/movieapi";
-import { useAuth } from "../context/AuthContext";
 import { Loader } from "./Loader";
 import "../styles/movieDetails.css";
 
 export function MovieDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,17 +36,6 @@ export function MovieDetails() {
 
     fetchDetails();
   }, [id]);
-
-  const handleBookmarkToggle = async () => {
-    if (!movie) return;
-
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
-
-    await toggleBookmark(movie);
-  };
 
   // Called when user clicks "Watch Trailer"
   const handleWatchTrailer = async () => {
@@ -112,7 +99,6 @@ export function MovieDetails() {
     );
   }
 
-  const bookmarked = isBookmarked(movie.id);
   const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
   const posterUrl =
     movie.poster_path && !imageError
@@ -151,7 +137,7 @@ export function MovieDetails() {
         </div>
 
         <div className="movie-details-layout mb-8">
-          {/* Poster and Bookmark Button */}
+          {/* Poster */}
           <div className="relative w-full max-w-[280px] md:max-w-none aspect-[2/3] mx-auto overflow-hidden rounded-2xl bg-slate-200 dark:bg-[#0F1322] border border-slate-200 dark:border-white/10 shadow-xl group">
             {posterUrl ? (
               <img
@@ -165,24 +151,6 @@ export function MovieDetails() {
                 <span className="line-clamp-4">{movie.title || "No Image Available"}</span>
               </div>
             )}
-
-            <button
-              type="button"
-              className={`absolute top-3.5 right-3.5 z-10 flex items-center justify-center w-10 h-10 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
-                bookmarked
-                  ? "bg-[#FF3D68] border-[#FF3D68] text-white shadow-lg shadow-[#FF3D68]/40"
-                  : "border-white/20 bg-black/60 text-white hover:bg-[#FF3D68] hover:border-[#FF3D68]"
-              }`}
-              onClick={handleBookmarkToggle}
-              aria-label={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-              title={bookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-            >
-              <Bookmark
-                size={18}
-                fill={bookmarked ? "currentColor" : "none"}
-                stroke="currentColor"
-              />
-            </button>
           </div>
 
           {/* Movie Details Info */}

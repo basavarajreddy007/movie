@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bookmark, Play, Star } from "./icons";
+import { Check, Play, Plus, Star } from "./icons";
 import type { Movie } from "../types/movies";
 import { useAuth } from "../context/AuthContext";
 
 type Props = {
   movie: Movie;
-  onBookmarkToggle?: () => void;
 };
 
-export function MovieCard({ movie, onBookmarkToggle }: Props) {
+export function MovieCard({ movie }: Props) {
   const navigate = useNavigate();
-  const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
+  const { isAuthenticated, isInWatchlist, toggleWatchlist } = useAuth();
   const [imageError, setImageError] = useState(false);
 
-  const bookmarked = isBookmarked(movie.id);
+  const inWatchlist = isInWatchlist(movie.id);
   const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
   const releaseYear = movie.release_date ? movie.release_date.slice(0, 4) : "N/A";
   const posterUrl =
@@ -22,18 +21,17 @@ export function MovieCard({ movie, onBookmarkToggle }: Props) {
       ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
       : null;
 
-  const handleBookmarkClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+const handleWatchlistClick = async (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
+  if (!isAuthenticated) {
+    navigate("/login");
+    return;
+  }
 
-    await toggleBookmark(movie);
-    onBookmarkToggle?.();
-  };
+  await toggleWatchlist(movie);
+};
 
   return (
     <Link
@@ -59,32 +57,24 @@ export function MovieCard({ movie, onBookmarkToggle }: Props) {
 
           <div className="absolute inset-0 bg-gradient-to-t from-[#0B1020]/90 via-[#0B1020]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-          {/* Bookmark Button */}
+          {/* Watchlist Button */}
           <button
-            type="button"
-            className={`absolute top-2.5 left-2.5 z-20 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
-              bookmarked
-                ? "bg-[#FF3D68] border-[#FF3D68] text-white shadow-md shadow-[#FF3D68]/30"
-                : "border-white/20 bg-[#12182A]/80 text-white hover:bg-[#FF3D68] hover:border-[#FF3D68]"
-            }`}
-            onClick={handleBookmarkClick}
-            aria-label={
-              bookmarked
-                ? `Remove ${movie.title || "movie"} from bookmarks`
-                : `Bookmark ${movie.title || "movie"}`
-            }
-            title={
-              bookmarked
-                ? "Remove from bookmarks"
-                : "Bookmark movie"
-            }
-          >
-            <Bookmark
-              size={16}
-              fill={bookmarked ? "currentColor" : "none"}
-              stroke="currentColor"
-            />
-          </button>
+  type="button"
+  className={`absolute top-2.5 left-2.5 z-20 flex items-center justify-center w-9 h-9 rounded-full border backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer ${
+    inWatchlist
+      ? "bg-[#FF3D68] border-[#FF3D68] text-white"
+      : "border-white/20 bg-[#12182A]/80 text-white hover:bg-[#FF3D68] hover:border-[#FF3D68]"
+  }`}
+  onClick={handleWatchlistClick}
+  aria-label={
+    inWatchlist
+      ? `Remove ${movie.title} from watchlist`
+      : `Add ${movie.title} to watchlist`
+  }
+  title={inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+>
+  {inWatchlist ? <Check size={17} /> : <Plus size={17} />}
+</button>
 
           {/* Play Icon */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 scale-90 group-hover:scale-100 pointer-events-none">

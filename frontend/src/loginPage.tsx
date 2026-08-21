@@ -104,8 +104,8 @@ export function LoginPage() {
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
               {isRegister
-                ? "Join MOVIEMAX to explore movies and manage your personal bookmarks."
-                : "Sign in to access your movie watchlist and bookmarks."}
+                ? "Join MOVIEMAX to explore movies and manage your personal watchlist."
+                : "Sign in to access your saved movies and watchlist."}
             </p>
           </div>
 

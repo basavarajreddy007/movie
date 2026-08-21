@@ -2,10 +2,14 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   type ReactNode,
 } from "react";
 import { loginUser, registerUser } from "../service/authApi";
-import { toggleUserBookmark } from "../service/bookmarkApi";
+import {
+  fetchWatchlist,
+  toggleUserWatchlist,
+} from "../service/watchlistApi";
 import type {
   AuthContextType,
   LoginCredentials,
@@ -17,7 +21,6 @@ import type { Movie } from "../types/movies";
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Load initial user and token from localStorage
   const [user, setUser] = useState<User | null>(() => {
     try {
       const savedUser = localStorage.getItem("user");
@@ -31,125 +34,166 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem("token");
   });
 
-  // Bookmarks are loaded directly from user session (no extra API call on login/mount)
-  const [bookmarks, setBookmarks] = useState<Movie[]>(() => {
+  const [watchlist, setWatchlist] = useState<Movie[]>(() => {
     try {
       const savedUser = localStorage.getItem("user");
-      const parsed = savedUser ? JSON.parse(savedUser) : null;
-      return parsed?.bookmarks || [];
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (Array.isArray(parsed.watchlist)) {
+          return parsed.watchlist;
+        }
+      }
     } catch {
       return [];
     }
+    return [];
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const isAuthenticated = !!user && !!token;
-  const bookmarkCount = bookmarks.length;
+  const watchlistCount = watchlist.length;
 
-  // Helper to save authenticated session & bookmarks
-  const saveAuthSession = (newUser: User, newToken: string) => {
-    setUser(newUser);
-    setToken(newToken);
-    const userBookmarks = newUser.bookmarks || [];
-    setBookmarks(userBookmarks);
+  const loadWatchlist = async (authToken: string) => {
+    const res = await fetchWatchlist(authToken);
 
-    try {
-      localStorage.setItem("user", JSON.stringify(newUser));
-      localStorage.setItem("token", newToken);
-    } catch {
-      // ignore
+    if (res.success && res.watchlist) {
+      setWatchlist(res.watchlist);
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updated = { ...prev, watchlist: res.watchlist };
+        try {
+          localStorage.setItem("user", JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
     }
   };
 
-  // Check if a movie is bookmarked
-  const isBookmarked = (movieId: number): boolean => {
-    return bookmarks.some((m) => m.id === movieId);
+
+
+  const saveAuthSession = (
+    newUser: User,
+    newToken: string,
+    initialWatchlist?: Movie[]
+  ) => {
+    const userWithWatchlist = {
+      ...newUser,
+      watchlist: initialWatchlist ?? newUser.watchlist ?? [],
+    };
+    setUser(userWithWatchlist);
+    setToken(newToken);
+    if (initialWatchlist || newUser.watchlist) {
+      setWatchlist(initialWatchlist || newUser.watchlist || []);
+    }
+
+    try {
+      localStorage.setItem("user", JSON.stringify(userWithWatchlist));
+      localStorage.setItem("token", newToken);
+    } catch {}
   };
 
-  // Toggle bookmark in MongoDB - updates state directly from toggle response
-  const toggleBookmark = async (movie: Movie): Promise<boolean> => {
+  const isInWatchlist = (movieId: number) => {
+    return watchlist.some((movie) => movie.id === movieId);
+  };
+
+  const toggleWatchlist = async (movie: Movie) => {
     if (!token) {
-      setAuthError("Please sign in to bookmark movies.");
+      setAuthError("Please sign in to manage your watchlist.");
       return false;
     }
 
-    const res = await toggleUserBookmark(movie, token);
-    if (res.success && res.bookmarks) {
-      setBookmarks(res.bookmarks);
+    const res = await toggleUserWatchlist(movie, token);
 
-      // Sync updated bookmarks with stored user
-      if (user) {
-        const updatedUser = { ...user, bookmarks: res.bookmarks };
-        setUser(updatedUser);
+    if (res.success && res.watchlist) {
+      setWatchlist(res.watchlist);
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updated = { ...prev, watchlist: res.watchlist };
         try {
-          localStorage.setItem("user", JSON.stringify(updatedUser));
-        } catch {
-          // ignore
-        }
-      }
-      return res.isBookmarked ?? !isBookmarked(movie.id);
+          localStorage.setItem("user", JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+
+      return res.isInWatchlist ?? isInWatchlist(movie.id);
     }
 
-    return isBookmarked(movie.id);
+    return isInWatchlist(movie.id);
   };
 
-  // Log in user - bookmarks come directly in login response
+  const refreshWatchlist = async () => {
+    if (!token) return;
+
+    await loadWatchlist(token);
+  };
+
   const login = async (credentials: LoginCredentials) => {
     setAuthError(null);
     setIsLoading(true);
 
     const res = await loginUser(credentials);
+
     setIsLoading(false);
 
     if (!res.success || !res.token || !res.user) {
       const msg = res.message || "Invalid email or password.";
       setAuthError(msg);
-      return { success: false, message: msg };
+
+      return {
+        success: false,
+        message: msg,
+      };
     }
 
-    saveAuthSession(res.user, res.token);
-    return { success: true };
+    const incomingWatchlist = res.watchlist || res.user.watchlist || [];
+    saveAuthSession(res.user, res.token, incomingWatchlist);
+
+    return {
+      success: true,
+    };
   };
 
-  // Register new user
   const register = async (credentials: RegisterCredentials) => {
     setAuthError(null);
     setIsLoading(true);
 
     const res = await registerUser(credentials);
+
     setIsLoading(false);
 
     if (!res.success || !res.token || !res.user) {
       const msg = res.message || "Unable to create account.";
       setAuthError(msg);
-      return { success: false, message: msg };
+
+      return {
+        success: false,
+        message: msg,
+      };
     }
 
-    saveAuthSession(res.user, res.token);
-    return { success: true };
+    const incomingWatchlist = res.watchlist || res.user.watchlist || [];
+    saveAuthSession(res.user, res.token, incomingWatchlist);
+
+    return {
+      success: true,
+    };
   };
 
-  // Log out user
   const logout = () => {
     setUser(null);
     setToken(null);
-    setBookmarks([]);
+    setWatchlist([]);
     setAuthError(null);
-    try {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-    } catch {
-      // ignore
-    }
+
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
-  const refreshBookmarks = async () => {
-    // Bookmarks are synced with user login and toggle responses
+  const clearAuthError = () => {
+    setAuthError(null);
   };
-
-  const clearAuthError = () => setAuthError(null);
 
   return (
     <AuthContext.Provider
@@ -159,11 +203,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated,
         isLoading,
         authError,
-        bookmarks,
-        bookmarkCount,
-        isBookmarked,
-        toggleBookmark,
-        refreshBookmarks,
+        watchlist,
+        watchlistCount,
+        isInWatchlist,
+        toggleWatchlist,
+        refreshWatchlist,
         login,
         register,
         logout,
@@ -175,12 +219,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Custom hook to use AuthContext
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth must be used inside AuthProvider");
   }
+
   return context;
 }
-
